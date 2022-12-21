@@ -1,28 +1,19 @@
 import React, { useEffect } from 'react';
-import {useState} from 'react';
-import { MapContainer, GeoJSON, TileLayer } from 'react-leaflet';
+import { useState } from 'react';
+import { MapContainer, TileLayer, useMap } from 'react-leaflet';
+import './App.css';
+let gpxParser = require('gpxparser');
 
-const ShapefileOverlayMap = () => {
-  const [data, setData] = useState(null);
-
-  useEffect(() => {
-    // Load the shapefile data from a URL or file
-    fetch('/src/ebird_track.gpx')
-      .then(response => response.json())
-      .then(json => setData(json));
-  }, []);
-
+// parsing the .gpx files
+var gpx = new gpxParser();
+let geoJSON = gpx.toGeoJSON('./my-app/src/ebird_track.gpx');
+console.log(geoJSON);
+function App() {
   return (
-    <MapContainer center={[0, 0]} zoom={13}>
-      <TileLayer
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-      />
-      {data && (
-        <GeoJSON data={data} style={() => ({ color: 'red' })} />
-      )}
+    <MapContainer center={[-122, 38]} zoom={5} scrollWheelZoom={true}>
+      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
     </MapContainer>
   );
 };
 
-export default ShapefileOverlayMap;
+export default App;
