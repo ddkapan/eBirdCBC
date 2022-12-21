@@ -1,13 +1,18 @@
 import React, { useEffect, useRef } from 'react';
 import { useState } from 'react';
-import { MapContainer, TileLayer, useMap } from 'react-leaflet';
+import { MapContainer, Polyline, TileLayer, useMap } from 'react-leaflet';
 import './App.css';
 import L from 'leaflet';
 import { GeoJSON } from 'https://cdn.esm.sh/react-leaflet/GeoJSON';
-import track from './tracks.geojson';
+const track = require('./tracks.json');
 let gpxParser = require('gpxparser');
 
-
+  
+// reversing the coordinates
+for (let i = 0; i < track.features[0].geometry.coordinates.length - 1; i++) {
+  const temp = track.features[0].geometry.coordinates[i].reverse();
+  track.features[0].geometry.coordinates[i].push(temp);
+}
 
 
 // parsing the .gpx files
@@ -20,10 +25,10 @@ function App() {
     const { current = {} } = mapRef;
     const { leafletElement: map } = current;
 
-    if ( !map ) return;
+    if (!map) return;
 
     L.GeoJSON(track, {
-      style: function() {
+      style: function () {
         return {
           color: 'red',
           weight: 5,
@@ -37,11 +42,14 @@ function App() {
 
   //tracks.addTo(mapRef.current);
 
+  console.log(track.features[0].geometry.coordinates[0][1])
+
   return (
     <div classname="App">
-    <MapContainer center={[38,-122]} zoom={10} scrollWheelZoom={true}>
-      <TileLayer url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}" />
-    </MapContainer>
+      <MapContainer center={[38, -122]} zoom={10} scrollWheelZoom={true}>
+        <TileLayer url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}" />
+        <Polyline pathOptions={{ color: 'red' }} positions={track.features[0].geometry.coordinates[0]} />
+      </MapContainer>
     </div>
   );
 };
