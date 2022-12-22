@@ -5,13 +5,13 @@ import './App.css';
 import L from 'leaflet';
 import { GeoJSON } from 'https://cdn.esm.sh/react-leaflet/GeoJSON';
 const track = require('./tracks.json');
-let gpxParser = require('gpxparser');
+//let gpxParser = require('gpxparser');
+
 
   
 // reversing the coordinates
-for (let i = 0; i < track.features[0].geometry.coordinates.length - 1; i++) {
-  const temp = track.features[0].geometry.coordinates[i].reverse();
-  track.features[0].geometry.coordinates[i].push(temp);
+for (let i = 0; i < track.features[0].geometry.coordinates[0].length; i++) {
+  track.features[0].geometry.coordinates[0][i].reverse();
 }
 
 
@@ -19,30 +19,30 @@ for (let i = 0; i < track.features[0].geometry.coordinates.length - 1; i++) {
 //var gpx = new gpxParser();
 //let geoJSON = gpx.toGeoJSON('./public/ebird_track.gpx');
 function App() {
-  const mapRef = useRef();
+  // const mapRef = useRef();
 
-  useEffect(() => {
-    const { current = {} } = mapRef;
-    const { leafletElement: map } = current;
+  // useEffect(() => {
+  //   const { current = {} } = mapRef;
+  //   const { leafletElement: map } = current;
 
-    if (!map) return;
+  //   if (!map) return;
 
-    L.GeoJSON(track, {
-      style: function () {
-        return {
-          color: 'red',
-          weight: 5,
-          opacity: 0.65
-        };
-      }
-    }).addTo(map);
-  }, [])
+  //   L.GeoJSON(track, {
+  //     style: function () {
+  //       return {
+  //         color: 'red',
+  //         weight: 5,
+  //         opacity: 0.65
+  //       };
+  //     }
+  //   }).addTo(map);
+  // }, [])
 
   //onst tracks = new L.geoJSON(tracks);
 
   //tracks.addTo(mapRef.current);
 
-  console.log(track.features[0].geometry.coordinates[0][1])
+  console.log(track.features[0].geometry.coordinates[0])
 
   return (
     <div classname="App">

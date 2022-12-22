@@ -12,21 +12,50 @@ const client = new MongoClient(uri);
 const checklists = ['S124281998'];
 
 async function main(checklist) {
-    var config = {
+  // get the checklist information
+    var configChecklist = {
       method: 'get',
       url: `https://api.ebird.org/v2/product/checklist/view/${checklist}`,
       headers: { 
         'X-eBirdApiToken': key
       }
     };
-    
-    const response = await axios(config)
+
+    const responseChecklist = await axios(configChecklist)
     .then(function (response) {
       return response.data;
     })
     .catch(function (error) {
       console.log(error);
     });
+
+    // get the checklist locId
+    const location = responseChecklist.locId;
+
+    console.log(location);
+
+    // use the locId to get the coords of the location
+    var configLoc = {
+      method: 'get',
+      url: `https://api.ebird.org/v2/ref/region/info/${location}`,
+      headers: { 
+        'X-eBirdApiToken': key
+      }
+    };
+    
+    const loc = await axios(configLoc)
+    .then(function (response) {
+      const lat = response.data.bounds.minY;
+      const long = response.data.bounds.minX;
+      return [lat, long];
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
+
+    console.log(loc);
+
+    responseChecklist.coords = loc;
 
     /*
     const species = []
@@ -39,15 +68,13 @@ async function main(checklist) {
         count.push(obs.howManyAtmost);
     });
     */
-
-    console.log(species, count)
     
   try{
     const database = client.db("eBirdCBC");
     const collection = database.collection("checklists");
 
     await collection.deleteMany({}); // delete all documents in the collection
-    await collection.insertOne({response}); // insert the response from the api call
+    await collection.insertOne({responseChecklist}); // insert the response from the api call
 
 } finally {
     await client.close();
