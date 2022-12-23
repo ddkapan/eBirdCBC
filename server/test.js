@@ -1,17 +1,22 @@
 var axios = require('axios');
 
-var config = {
-  method: 'get',
-  url: 'https://api.ebird.org/v2/ref/region/info/L21851965',
-  headers: { 
-    'X-eBirdApiToken': 'vd22umpprej0'
-  }
-};
+checklists = ['S124281998', 'S124324579', 'S124324581'];
 
-axios(config)
+axios.get('http://localhost:9000/clear') 
+  .then(function (response) {
+    console.log(response);
+  })
+  .catch(function (error) {
+    console.log(error);
+  });
+
+
+for (const checklist of checklists) {
+axios.get(`http://localhost:9000/add-check?checklist=${checklist}`)
 .then(function (response) {
-  console.log(JSON.stringify(response.data));
+  console.log(response);
 })
 .catch(function (error) {
   console.log(error);
 });
+};
