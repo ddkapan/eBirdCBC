@@ -1,4 +1,18 @@
+const axios = require('axios');
+const MongoClient = require('mongodb').MongoClient;
+
+// getting the ebird and passwords api key from the env 
+const key = process.env.EBIRDKEY;
+const password = process.env.MONGO_PASSWORD;
+
+// connecting to the mongoDB
+const url = `mongodb+srv://mschulist:${password}@ebirdcbc.i3igsse.mongodb.net/?retryWrites=true&w=majority`;
+
+
+
+
 async function main(checklist) {
+  const client = new MongoClient(url);
     // get the checklist information
       var configChecklist = {
         method: 'get',
@@ -60,10 +74,23 @@ async function main(checklist) {
       const database = client.db("eBirdCBC");
       const collection = database.collection("checklists");
   
-      await collection.deleteMany({}); // delete all documents in the collection
+      //await collection.deleteMany({}); // delete all documents in the collection
       await collection.insertOne({responseChecklist}); // insert the response from the api call
   
   } finally {
       await client.close();
   }
   };
+
+  async function clear() {
+    const client = new MongoClient(url);
+    try{
+      const database = client.db("eBirdCBC");
+      const collection = database.collection("checklists");
+      await collection.deleteMany({}); // delete all documents in the collection
+    } finally {
+      await client.close();
+    }
+  };
+
+module.exports = { main, clear };
