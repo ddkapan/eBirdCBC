@@ -1,23 +1,33 @@
 const express = require('express');
 const app = express();
 
+const cors = require('cors');
+
+app.use(cors());
+
 // using axios to make api calls to eBird and mongodb to connect to the database
 
 const funs = require('./lib.js');
 
 
-app.get('/add-check', (req, res) => {
+app.put('/add-check', (req, res) => {
     const checklist = req.query.checklist;
     console.log(checklist.data);
-        funs.main(checklist);
+    funs.main(checklist);
     res.send(`inputted ${checklist} into the database`);
 });
 
-app.get('/clear', (req, res) => {
+app.post('/clear', (req, res) => {
     funs.clear();
     res.send('cleared the database');
 });
 
+app.get('/get-points', async function (req, res) {
+    const points = await funs.getPoints();
+    console.log(points);
+    res.send(points);
+});
+
 app.listen(9000, () => {
     console.log('Server listening on port 9000');
-  });
+});
