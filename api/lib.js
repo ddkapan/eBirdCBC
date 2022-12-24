@@ -134,6 +134,27 @@ async function updateDep(update) {
 }
 }
 
+// getting the species list from the database
+async function getSpecies() {
+  const data = await getPoints();
+  const obs = [];
+  for(let i = 0; i < data.length; i++) {
+    const observ = data[i].responseChecklist.obs;
+    const species = [];
+    for(let j = 0; j < observ.length; j++) {
+      const code = observ[j].speciesCode;
+      const count = observ[j].howManyAtleast;
+      species.push(JSON.parse(`{"${code}": ${count}}`));
+    }
+    obs.push(species);
+  }
+  console.log(obs);
+  //console.log(data);
+
+}
+
+getSpecies();
+
 
 
 
