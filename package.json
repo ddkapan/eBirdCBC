@@ -18,7 +18,10 @@
   "homepage": "https://github.com/ddkapan/eBirdCBC#readme",
   "dependencies": {
     "axios": "^0.21.4",
+    "leaflet": "^1.9.3",
     "mongodb": "^4.13.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "request": "^2.88.2"
   }
 }
