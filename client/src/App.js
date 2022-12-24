@@ -15,9 +15,21 @@ function App() {
   const [checklists, setlist] = useState("");
   const [markers, setpoints] = useState([]);
   const [deps, setdeps] = useState([]);
-  const [colors, setcolors] = useState([])
+  //const [icon, setIcon] = useState([])
   const [map, setMap] = useState(null);
   const [count, setCount] = useState(0);
+
+  // making different icons for each dependency
+  const icons = []
+  for(let i = 0; i < deps.length; i++) {
+    const image = `/icons/icon_${deps[i]}.png`
+    const icon = L.icon({ 
+      iconUrl: image,
+      iconSize: [25, 41],
+  })
+  icons.push(icon);    
+ }
+    
 
 
   async function getSpecies() {
@@ -143,7 +155,7 @@ function App() {
         for (let i = 0; i < response.data.length; i++) {
           const speciesList = [];
           for (let j = 0; j < response.data[i].responseChecklist.obs.length; j++) {
-            const code = (response.data[i].responseChecklist.obs[j].speciesCode);
+            const code = (`${response.data[i].responseChecklist.obs[j].speciesCode} (${response.data[i].responseChecklist.obs[j].howManyAtleast})`);
             var comments = (response.data[i].responseChecklist.obs[j].comments);
             if (comments === undefined) {
               speciesList.push(`${code}`);
@@ -214,10 +226,11 @@ function App() {
 
       <button onClick={getSpecies}>Get Species</button>
 
+
       <MapContainer whenCreated={setMap} classname='Map' center={[38, -122]} zoom={10} scrollWheelZoom={true}>
         <TileLayer url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}" />
-        {markers.map((marker) => (
-          <Marker position={marker[1]}>
+        {markers.map((marker, index) => (
+          <Marker position={marker[1]} icon={icons[marker[0]]}>
             <Popup maxWidth="500" maxHeight="auto">
               <h2>Checklist ID: {marker[4]}</h2>
               <h3>Date: {marker[2]}</h3>
@@ -226,8 +239,8 @@ function App() {
               <h3>Dependent: {marker[0]}
                 <br></br>
                 {deps.map((i) => (
-                  <button value={String(`${marker[4]},${i[0]}`)} // marker[4] is the checklist ID, i[0] is the dependent
-                  onClick={e => updateDep(e.target.value)}>Dependent {i[0]}</button>
+                  <button value={String(`${marker[4]},${i}`)} // marker[4] is the checklist ID, i[0] is the dependent
+                  onClick={e => updateDep(e.target.value)}>Dependent {i}</button>
                 ))}
               </h3>
               <h3>Species: </h3>
