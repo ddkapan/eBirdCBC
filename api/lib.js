@@ -1,4 +1,5 @@
 const axios = require('axios');
+const { response } = require('express');
 const MongoClient = require('mongodb').MongoClient;
 
 // getting the ebird and passwords api key from the env 
@@ -61,7 +62,7 @@ async function main(checklist) {
 
   responseChecklist.coords = loc;
 
-
+  //responseChecklist.dependent = 0;
 
   try {
     const database = client.db("eBirdCBC");
@@ -92,17 +93,48 @@ async function getPoints() {
     await client.connect();
     const database = client.db("eBirdCBC");
     const collection = database.collection("checklists");
+    /*const IDs = await collection.distinct('_id', {}); // get the number and IDs of documents in the collection
+    console.log(IDs);
+    for(let i = 0; i < IDs.length; i++) {
+      const filter = { _id: IDs[i]};
+      const updateDoc = {
+        $set: {
+          dependent: i
+      },
+    };
+    const result = await collection.updateOne(filter, updateDoc);
+    }*/
     const data = await collection.find({}).toArray();
-    for (let i = 0; i < data.length; i++) {
-      data[i].responseChecklist.dependent = String(i);
-    }
     return data;
   } finally {
     await client.close();
   }
 };
 
+// update == "checklistId, new dependent value"
+async function updateDep(update) {
+  const client = new MongoClient(url);
+  try {
+    await client.connect();
+    const database = client.db("eBirdCBC");
+    const collection = database.collection("checklists");
+    const parse = update.split(",")
+    let json = `{"responseChecklist.subId": "${parse[0]}"}`
+    console.log(await collection.find({}).toArray());
+    const filter = JSON.parse(json);
+    const updateDoc = {
+      $set: {
+        dependent: String(`${parse[1]}`)
+    },
+  };
+  const result = await collection.updateOne(filter, updateDoc);
+  console.log(result);
+} finally {
+  await client.close();
+}
+}
 
 
 
-module.exports = { main, clear, getPoints };
+
+module.exports = { main, clear, getPoints, updateDep };
