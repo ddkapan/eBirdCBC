@@ -126,49 +126,62 @@ async function updateDep(update) {
     const updateDoc = {
       $set: {
         dependent: String(`${parse[1]}`)
-    },
-  };
-  const result = await collection.updateOne(filter, updateDoc);
-  console.log(result);
-} finally {
-  await client.close();
-}
+      },
+    };
+    const result = await collection.updateOne(filter, updateDoc);
+    console.log(result);
+  } finally {
+    await client.close();
+  }
 }
 
 // getting the species list from the database
 async function getSpecies() {
   const data = await getPoints();
+  console.log(data);
   var obs = [];
-  for(let i = 0; i < data.length; i++) {
+  for (let i = 0; i < data.length; i++) {
     const observ = data[i].responseChecklist.obs;
     const species = [];
-    for(let j = 0; j < observ.length; j++) {
+    for (let j = 0; j < observ.length; j++) {
       const code = observ[j].speciesCode;
       const count = observ[j].howManyAtleast;
       species.push(JSON.parse(`{"${code}": ${count}}`));
     }
     obs.push(species);
   }
-
+  // get the deps
+  const deps = [];
+  for (let i = 0; i < obs.length; i++) {
+    for (let j = 0; j < obs[i].length; j++) {
+      const dep = data[i].dependent;
+      deps.push(dep);
+    }
+  }
+  console.log(deps);
+  // take from "GCKI: 1" to {species: "GCKI", count: 1}
   var obs = obs.flat(1)
   const species = [];
-  for(let i = 0; i < obs.length; i++) {
+  for (let i = 0; i < obs.length; i++) {
     species.push(Object.keys(obs[i])[0]);
   }
   const counts = [];
-  for(let i = 0; i < obs.length; i++) {
+  for (let i = 0; i < obs.length; i++) {
     counts.push(Object.values(obs[i])[0]);
   }
+
   console.log(obs.length);
   //console.log(data);
   const df = new DataFrame({
     count: counts,
-    species :species,
+    species: species,
+    dependent: deps,
   });
   df.show();
   console.log(df.dim());
 
-  const speciesList = df.groupBy('species').aggregate(group => group.stat.sum('count')).rename('aggregation', 'count');
+  const speciesList = df.groupBy('dependent', 'species').aggregate(group => group.stat.max('count'))
+    .rename('aggregation', 'count').groupBy('species').aggregate(group => group.stat.sum('count')).rename('aggregation', 'count');
   speciesList.show();
   const speciesListCollection = speciesList.toCollection();
   console.log(speciesListCollection);
