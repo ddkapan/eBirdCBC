@@ -34,6 +34,11 @@ app.post('/dependency-update', async function (req, res) {
     res.send(`updated ${dependent} in the database`);
 });
 
+app.get('/get-species', async function (req, res) {
+    const species = await funs.getSpecies();
+    res.send(species);
+    });
+
 app.listen(9000, () => {
     console.log('Server listening on port 9000');
 });

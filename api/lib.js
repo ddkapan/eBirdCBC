@@ -1,6 +1,7 @@
 const axios = require('axios');
 const { response } = require('express');
 const MongoClient = require('mongodb').MongoClient;
+var DataFrame = require('dataframe-js').DataFrame;
 
 // getting the ebird and passwords api key from the env 
 const key = process.env.EBIRDKEY;
@@ -137,7 +138,7 @@ async function updateDep(update) {
 // getting the species list from the database
 async function getSpecies() {
   const data = await getPoints();
-  const obs = [];
+  var obs = [];
   for(let i = 0; i < data.length; i++) {
     const observ = data[i].responseChecklist.obs;
     const species = [];
@@ -148,14 +149,34 @@ async function getSpecies() {
     }
     obs.push(species);
   }
-  console.log(obs);
-  //console.log(data);
 
+  var obs = obs.flat(1)
+  const species = [];
+  for(let i = 0; i < obs.length; i++) {
+    species.push(Object.keys(obs[i])[0]);
+  }
+  const counts = [];
+  for(let i = 0; i < obs.length; i++) {
+    counts.push(Object.values(obs[i])[0]);
+  }
+  console.log(obs.length);
+  //console.log(data);
+  const df = new DataFrame({
+    count: counts,
+    species :species,
+  });
+  df.show();
+  console.log(df.dim());
+
+  const speciesList = df.groupBy('species').aggregate(group => group.stat.sum('count')).rename('aggregation', 'count');
+  speciesList.show();
+  const speciesListCollection = speciesList.toCollection();
+  console.log(speciesListCollection);
+  return speciesListCollection;
 }
 
-getSpecies();
 
 
 
 
-module.exports = { main, clear, getPoints, updateDep };
+module.exports = { main, clear, getPoints, updateDep, getSpecies };
