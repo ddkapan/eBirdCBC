@@ -26,6 +26,8 @@ Click on the points to view the checklist details. The `dependent` term means th
 
 Click `Get Species` to get a csv that has the appropriate counts for the species. Of course, some manual cleaning will have to be done (for hawks and rare birds that moved between areas), but overall, it should be an accurate representation of the birds seen. 
 
+Click `Clear` to clear the database. Sometimes, it will break when you add more checklists, so clearing it may fix some issues you have. 
+
 ## Limitations
 Only 25 markers have been created, so the app will not work with more than 25 checklists. You can manually create more markers using the python script in the `icon_maker` directory and add them to the `client/public/icons` directory, but I found that more than 25 points makes the colors too similar. 
 
