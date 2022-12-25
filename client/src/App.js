@@ -113,7 +113,7 @@ function App() {
       getChecklist(data[i]);
       setTimeout(function(){
         updateDep(`${data[i]},${i}`);
-      }, 500)
+      }, 1000)
       console.log("added", String(`${data[i]},${i}`));
     };
   }
