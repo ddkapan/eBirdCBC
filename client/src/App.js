@@ -208,8 +208,13 @@ function App() {
 
   return (
     <div classname="App">
+      <h2>Christmas Bird Count Compiler</h2>
+      1.) Input the checklist IDs separated by commas in the text box. Then click submit to add them to the database.<br></br>
+      2.) Click "Get Points" to get the points from the database. <br></br>
+      3.) Navigate to the points and click on them to see the species and notes. Select the 'dependent' status for each point to group overlapping points together.<br></br>
+      4.) Click "Get Species" to get the species from the database and compile them into a CSV file that will download.<br></br>
       <form onSubmit={handleSubmit}>
-        <label>Checklists IDs
+        <label>
           <input
             type="text"
             value={checklists}
