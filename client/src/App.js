@@ -91,7 +91,7 @@ function App() {
   function handleSubmit(e) {
     e.preventDefault();
     // add the checklists to the database
-    const data = checklists.split(",");
+    const data = checklists.replace(/\s/g, "").split(","); // remove whitespace and split by comma
     const getChecklist = async (a) => {
       await axios.put(`http://localhost:9000/add-check?checklist=${a}`)
         .then(function (response) {

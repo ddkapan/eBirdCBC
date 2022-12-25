@@ -28,5 +28,5 @@ def colorize(image, hue):
     return new_img
 
 image = Image.open("icon.png")
-for i in range(25):
-    colorize(image, i*14).save("./icons/icon_" + str(i) + ".png")
+for i in range(30):
+    colorize(image, i*12).save("./icons/icon_" + str(i) + ".png")
