@@ -8,7 +8,7 @@ const key = process.env.EBIRDKEY;
 const password = process.env.MONGO_PASSWORD;
 
 // connecting to the mongoDB
-const url = `mongodb+srv://mschulist:${password}@ebirdcbc.i3igsse.mongodb.net/?retryWrites=true&w=majority`;
+const url = 'mongodb://localhost:27017'
 
 
 
