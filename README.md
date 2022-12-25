@@ -5,7 +5,7 @@ Using eBird best practices to generate a best practices CBC count for a given co
 Download node from [here](https://nodejs.org/en/download/). Then clone this repo. Then cd to the dir for this repo. 
 
 ### Database
-This app uses a mongodb, which will run locally (unless you want to try and use Atlas, but local is easier). The easiest way to start a local mongodb is to clone the prebuilt docker image for a mongodb using `docker pull mongo`. Then run the image using `docker run mongo:latest` (or use the vscode extension which is easier to use imo). 
+This app uses a mongodb, which will run locally (unless you want to try and use Atlas, but local is easier). The easiest way to start a local mongodb is to clone the prebuilt docker image for a mongodb using `docker pull mongo` (download docker [here](https://docs.docker.com/get-docker/) if you don't already have it). Then run the image using `docker run mongo:latest` (or use the vscode extension which is easier to use imo). 
 
 ### Api
 This app uses an expressjs as a backend. Navigate to `api/` using `cd api`. Then run `npm install` to install the dependencies. 
