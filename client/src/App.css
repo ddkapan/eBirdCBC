@@ -42,6 +42,11 @@ input:hover{
   color: #ffffff;
 }
 
+input[type="text" i] {
+  cursor: text;
+  width: 30vw;
+}
+
 input {
   background-color: #243447;
   border-radius: 8px;
@@ -60,21 +65,23 @@ input {
   text-align: left;
   transition: all 200ms;
   vertical-align: baseline;
-  white-space: nowrap;
+  white-space: normal;
   user-select: none;
   -webkit-user-select: none;
-  width: fit-content;
+  width: auto;
+
 }
 
 
 
 pre {
   white-space: pre-wrap;
+  font-family: Ubuntu, "times new roman", times, roman, serif;
 }
 
 .leaflet-container{
   width: 100vw;
-  height: 100vh;
+  height: calc(100vh - 250px);
 }
 
 .leaflet-popup-content-wrapper, .leaflet-popup-tip {

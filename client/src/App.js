@@ -162,7 +162,7 @@ function App() {
             if (comments === undefined) {
               speciesList.push(`${code}`);
             } else {
-              speciesList.push(`${code} -- ${comments}`);
+              speciesList.push(`${code} — ${comments}`);
             }
 
           };
@@ -214,7 +214,7 @@ function App() {
           <input
             type="text"
             value={checklists}
-            placeholder="Checklists IDs"
+            placeholder="Checklists IDs (comma delimited)"
             onChange={(e) => setlist(e.target.value)}
           />
         </label>
@@ -232,7 +232,7 @@ function App() {
         <TileLayer url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}" />
         {markers.map((marker, index) => (
           <Marker position={marker[1]} icon={icons[marker[0]]}>
-            <Popup maxWidth="500" maxHeight="500">
+            <Popup minWidth="500" maxHeight="500">
               <h2>Checklist ID: {marker[4]}</h2>
               <h3>Observer: {marker[7]}</h3>
               <h3>Date: {marker[2]}</h3>
@@ -248,7 +248,7 @@ function App() {
               <Dropdown options={(deps.map((i) => JSON.parse(`{"value": "${marker[4]},${i}", "label": "${i}"}`)))} 
                 onChange={value => updateDep(value.value)} placeholder={marker[0]} />
               <h3>Species: </h3>
-              <h5><pre>{marker[5]}</pre></h5>
+              <pre>{marker[5]}</pre>
             </Popup>
           </Marker>
         ))};

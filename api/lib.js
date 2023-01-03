@@ -1,7 +1,9 @@
+const ebirdcode = require("./public/ebirdCodes.json")
 const axios = require('axios');
 const { response } = require('express');
 const MongoClient = require('mongodb').MongoClient;
 var DataFrame = require('dataframe-js').DataFrame;
+
 
 // getting the ebird and passwords api key from the env 
 const key = process.env.EBIRDKEY;
@@ -169,19 +171,24 @@ async function getSpecies() {
   for (let i = 0; i < obs.length; i++) {
     counts.push(Object.values(obs[i])[0]);
   }
+  const names = []
+  for (let i = 0; i < species.length; i++) {
+    names.push(ebirdcode[species[i]])
+  }
 
   console.log(obs.length);
   //console.log(data);
   const df = new DataFrame({
     count: counts,
     species: species,
+    common_name: names, 
     dependent: deps,
   });
   df.show();
   console.log(df.dim());
 
-  const speciesList = df.groupBy('dependent', 'species').aggregate(group => group.stat.max('count'))
-    .rename('aggregation', 'count').groupBy('species').aggregate(group => group.stat.sum('count')).rename('aggregation', 'count');
+  const speciesList = df.groupBy('dependent', 'species', 'common_name').aggregate(group => group.stat.max('count'))
+    .rename('aggregation', 'count').groupBy('species', 'common_name').aggregate(group => group.stat.sum('count')).rename('aggregation', 'count');
   speciesList.show();
   const speciesListCollection = speciesList.toCollection();
   console.log(speciesListCollection);
