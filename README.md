@@ -6,7 +6,7 @@ Using eBird best practices to generate a best practices CBC count for a given co
 This app uses a mongodb, which will run locally. I have yet to find a good way to package mongo with the app, so in the meantime it will have to be run separately. The good news is that docker makes it very easy to start a local mongodb. The easiest way to start a local mongodb is to clone the prebuilt docker image for a mongodb using `docker pull mongo` (download docker [here](https://docs.docker.com/get-docker/) if you don't already have it). Then run the image using `docker run --name mongodb -d -p 27017:27017 mongo` (or use the vscode extension which is easier to use imo). Sometimes it will not let you run the container if it thinks that it's already running. To fix this issue, you may have to stop or remove the hash of the container that it thinks is running. 
 
 ## App
-Download the appropriate version of the app for your operating system on the releases page of this github. Then run it. 
+Download the appropriate version of the app for your operating system on the [releases page](https://github.com/ddkapan/eBirdCBC/releases/) of this github. Then run it. 
 
 # Usage
 Input the checklist IDs delimited by a comma (`,`). Click `Submit` to add them to the database. When first opening the app and adding checklists, it will show a blank screen and "crash." To fix this, reload the app and click `clear`. Now it should function normally. 
