@@ -9,7 +9,7 @@ This app uses a mongodb, which will run locally. I have yet to find a good way t
 Download the appropriate version of the app for your operating system on the releases page of this github. Then run it. 
 
 # Usage
-Input the checklist IDs delimited by a comma (`,`). Click `Submit` to add them to the database. 
+Input the checklist IDs delimited by a comma (`,`). Click `Submit` to add them to the database. When first opening the app and adding checklists, it will show a blank screen and "crash." To fix this, reload the app and click `clear`. Now it should function normally. 
 
 Click on the points to view the checklist details. The `dependent` term means the group that the checklist is a part of. The idea is that you will add checklists that are counting the same areas to the same `dependent` so that they will be grouped together and the high counts will be taken, instead of double counting the individual birds. The marker colors should correspond to the `dependent` ID, making it easier to see which checklists are grouped together. 
 
