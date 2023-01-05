@@ -23,7 +23,7 @@ function App() {
   // making different icons for each dependency
   const icons = []
   for (let i = 0; i < 30; i++) {
-    const image = `/icons/icon_${deps[i]}.png`
+    const image = `https://raw.githubusercontent.com/ddkapan/eBirdCBC/main/icon_maker/icons/icon_${deps[i]}.png`
     const icon = L.icon({
       iconUrl: image,
       iconSize: [25, 41],

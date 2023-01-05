@@ -17,6 +17,10 @@
     "jade": "~1.11.0",
     "json-2-csv": "^3.18.0",
     "mongodb": "^4.13.0",
-    "morgan": "~1.9.1"
+    "morgan": "~1.9.1",
+    "pkg": "^5.8.0"
+  },
+  "devDependencies": {
+    "electron": "^22.0.0"
   }
 }
