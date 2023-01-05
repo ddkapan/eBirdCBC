@@ -6,7 +6,8 @@ var DataFrame = require('dataframe-js').DataFrame;
 
 
 // getting the ebird and passwords api key from the env 
-const key = process.env.EBIRDKEY;
+//const key = process.env.EBIRDKEY;
+const key = 'vd22umpprej0'
 //const password = process.env.MONGO_PASSWORD;
 
 // connecting to the mongoDB

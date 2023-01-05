@@ -1,0 +1,24 @@
+{
+    "productName": "eBird CBC Compliler",
+    "copyright": "Copyright © 2023 Mark Schulist",
+    "mac": {
+      "icon": "./favicion.ico",
+      "category": "public.app-category.utilities"
+    },
+    "win": {
+      "icon": "./favicion.ico" 
+    },
+    "linux": {
+      "icon": "./favicion.ico"
+    },
+    "files": [
+      "./build/**/*",
+      "./dist/**/*",
+      "./node_modules/**/*",
+      "./public/**/*",       
+      "*.js"
+    ],
+    "directories": {
+      "buildResources": "public" 
+    }
+  }
