@@ -22,7 +22,7 @@ function App() {
 
   // making different icons for each dependency
   const icons = []
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < 99; i++) {
     const image = `https://raw.githubusercontent.com/ddkapan/eBirdCBC/main/icon_maker/icons/icon_${deps[i]}.png`
     const icon = L.icon({
       iconUrl: image,
@@ -125,12 +125,12 @@ function App() {
       await getChecklist(data[i]);
       setTimeout(function () {
         updateDep(`${data[i]},${i}`);
-      }, 1000)
+      }, 2000)
       console.log("added", String(`${data[i]},${i}`));
     };
     setTimeout(function () {
       getpts();
-    }, 3000)
+    }, 4000)
   }
 
 
@@ -140,6 +140,10 @@ function App() {
     const points = await axios.get(`http://localhost:9000/get-points`)
       .then(function (response) {
         console.log("GOT POINTS", response.data);
+        const locName = [];
+        for (let i = 0; i < response.data.length; i++) {
+          locName.push(response.data[i].responseChecklist.locName);
+        };
         const coords = [];
         for (let i = 0; i < response.data.length; i++) {
           coords.push(response.data[i].responseChecklist.coords);
@@ -198,6 +202,7 @@ function App() {
           notes: notes,
           species: species,
           observer: observer,
+          locName: locName
         };
       })
       .catch(function (error) {
@@ -205,7 +210,7 @@ function App() {
       });
     console.log(points);
     const data = zip(points.dependent, points.coords, points.date, points.duration,
-      points.ID, points.species, points.notes, points.observer);
+      points.ID, points.species, points.notes, points.observer, points.locName);
     console.log(data);
     setpoints(data);
 
@@ -250,6 +255,7 @@ function App() {
           <Marker position={marker[1]} icon={icons[marker[0]]}>
             <Popup minWidth="500" maxHeight="500">
               <h2>Checklist ID: {marker[4]}</h2>
+              <h3>Location: {marker[8]}</h3>
               <h3>Observer: {marker[7]}</h3>
               <h3>Date: {marker[2]}</h3>
               <h3>Duration: {marker[3]}</h3>
