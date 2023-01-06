@@ -1,19 +1,96 @@
+const puppeteer = require('puppeteer');
 const ebirdcode = require("./public/ebirdCodes.json")
 const axios = require('axios');
 const { response } = require('express');
 const MongoClient = require('mongodb').MongoClient;
 var DataFrame = require('dataframe-js').DataFrame;
+var path = require('path');
 
 
 // getting the ebird and passwords api key from the env 
-//const key = process.env.EBIRDKEY;
-const key = 'vd22umpprej0'
+const key = process.env.EBIRDKEY;
 //const password = process.env.MONGO_PASSWORD;
 
 // connecting to the mongoDB
 const url = 'mongodb://localhost:27017'
 
+// try to get to work with multiple species at once so only have to log in once
+async function getTrack(checklist) {
+  const browser = await puppeteer.launch({
+    executablePath: '/usr/bin/chromium',
+    headless: true,
+    devtools: true,
+    defaultViewport: {
+      width: 1920,
+      height: 1080,
+    }
+  });
+  const page = await browser.newPage();
+  await page.goto('https://secure.birds.cornell.edu/cassso/login?service=https%3A%2F%2Febird.org%2Flogin%2Fcas%3Fportal%3Debird&locale=en_US', {
+    waitUntil: "networkidle0",
+  });
+  console.log(page.url());
+  await page.screenshot({path: 'screenshot.png'}); // for debugging
+  if (page.url() != 'https://ebird.org/home') {
+  await page.type('#input-user-name', 'abbottslagoon');
+  await page.type('#input-password', 'ltducogo@abbott$');
+  await page.screenshot({path: 'screenshot.png'}); // for debugging
+  await Promise.all([
+  await page.click('#form-submit'),
+  await page.waitForNavigation({ waitUntil: "networkidle0", timeout: 10000 }),
+  ]);
+  }
 
+  await page.goto(`https://ebird.org/checklist/${checklist}`, {
+    waitUntil: "networkidle0"
+  });
+  const data = await page.evaluate(() => {
+    if (document.querySelector(".Track")){
+    return document.querySelector('.Track').dataset.maptrackData.split(',');
+    } else {
+      return null;
+    }
+  });
+  const points = [];
+  if (data != null){
+  for(let i = 0; i < data.length; i+=2) {
+    points.push([data[i + 1], data[i]]); // lat, long
+  }
+}
+  await browser.close();
+  //console.log(points);
+  return points;
+}
+
+async function tripReport(report) {
+  const browser = await puppeteer.launch({
+    executablePath: '/usr/bin/chromium',
+    headless: true,
+    devtools: true,
+    defaultViewport: {
+      width: 1920,
+      height: 1080,
+    }
+  });
+  const page = await browser.newPage();
+  await page.goto(`https://ebird.org/tripreport/${report}?view=checklists`, {
+    waitUntil: "networkidle0",
+  });
+
+  // await page.screenshot({path: 'screenshot.png'}); // for debugging
+  const data = await page.evaluate(() => {
+    let checknums = document.getElementsByClassName('ReportList-checklists')[0].getElementsByClassName('ChecklistItem');
+    let checklists = [];
+    for (var i = 0; i < checknums.length; i++) {
+      checklists.push(checknums[i].getElementsByTagName('a')[0].getAttribute('href').slice(11));
+    }
+    return checklists
+
+  });
+  await browser.close();
+  console.log(data);
+  return data;
+}
 
 async function main(checklist) {
   const client = new MongoClient(url);
@@ -182,7 +259,7 @@ async function getSpecies() {
   const df = new DataFrame({
     count: counts,
     species: species,
-    common_name: names, 
+    common_name: names,
     dependent: deps,
   });
   df.show();
@@ -196,8 +273,6 @@ async function getSpecies() {
   return speciesListCollection;
 }
 
+// getTrack('S124180823')
 
-
-
-
-module.exports = { main, clear, getPoints, updateDep, getSpecies };
+module.exports = { main, clear, getPoints, updateDep, getSpecies, tripReport };
