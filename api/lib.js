@@ -7,9 +7,10 @@ var DataFrame = require('dataframe-js').DataFrame;
 var path = require('path');
 
 
-// getting the ebird and passwords api key from the env 
+// getting the ebird and passwords api key from the env
 const key = process.env.EBIRDKEY;
 //const password = process.env.MONGO_PASSWORD;
+const password = process.env.abbottspassword;
 
 // connecting to the mongoDB
 const url = 'mongodb://localhost:27017'
@@ -32,8 +33,7 @@ async function getTrack(checklist) {
   console.log(page.url());
   await page.screenshot({path: 'screenshot.png'}); // for debugging
   if (page.url() != 'https://ebird.org/home') {
-  await page.type('#input-user-name', 'abbottslagoon');
-  await page.type('#input-password', '[insert password]');
+  await page.type('#input-user-name', password);
   await page.screenshot({path: 'screenshot.png'}); // for debugging
   await Promise.all([
   await page.click('#form-submit'),
