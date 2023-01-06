@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MapContainer, TileLayer, Popup, Marker } from 'react-leaflet';
+import { MapContainer, TileLayer, Popup, Marker, Polyline } from 'react-leaflet';
 import './App.css';
 import L from 'leaflet';
 import axios from 'axios';
@@ -84,10 +84,24 @@ function App() {
   };
 
   // when the form is submitted, add the checklists to the database
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
+    async function findChecklist() {
+      if (!checklists.includes('S')){
+        var data = await axios.get(`http://localhost:9000/report?number=${checklists}`)
+          .then(function (response) {
+            console.log("GOT CHECKLISTS", response.data);
+            return response.data;
+      }
+    )} 
+    else {
+      var data = checklists.replace(/\s/g, "").split(","); // remove whitespace and split by comma
+    }
+    return data;
+    }
+    // if a trip report, as the api to get the checklists
+    
     // add the checklists to the database
-    const data = checklists.replace(/\s/g, "").split(","); // remove whitespace and split by comma
     const getChecklist = async (a) => {
       await axios.put(`http://localhost:9000/add-check?checklist=${a}`)
         .then(function (response) {
@@ -105,8 +119,10 @@ function App() {
           console.log(error);
         });
     };
+    const data = await findChecklist();
+    console.log(data)
     for (let i = 0; i < data.length; i++) {
-      getChecklist(data[i]);
+      await getChecklist(data[i]);
       setTimeout(function () {
         updateDep(`${data[i]},${i}`);
       }, 1000)
@@ -114,7 +130,7 @@ function App() {
     };
     setTimeout(function () {
       getpts();
-    }, 2000)
+    }, 3000)
   }
 
 
@@ -214,7 +230,7 @@ function App() {
           <input
             type="text"
             value={checklists}
-            placeholder="Checklists IDs (comma delimited)"
+            placeholder="Checklists IDs (comma delimited) or Trip Report"
             onChange={(e) => setlist(e.target.value)}
           />
         </label>
@@ -238,7 +254,7 @@ function App() {
               <h3>Date: {marker[2]}</h3>
               <h3>Duration: {marker[3]}</h3>
               <h3>Checklist Comments: {marker[6]}</h3>
-              <h3>Dependent: {marker[0]}
+              <h3>Group: {marker[0]}
                 <br></br>
                 {/*deps.map((i) => (
                   <button value={String(`${marker[4]},${i}`)} // marker[4] is the checklist ID, i is the dependent
@@ -251,6 +267,7 @@ function App() {
               <pre>{marker[5]}</pre>
             </Popup>
           </Marker>
+          
         ))};
       </MapContainer>
     </div>
