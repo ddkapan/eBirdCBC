@@ -19,6 +19,7 @@
     "json-2-csv": "^3.18.0",
     "kill-port": "^2.0.1",
     "lodash.zip": "^4.2.0",
+    "nedb": "^1.8.0",
     "react": "^18.2.0",
     "react-csv": "^2.2.2",
     "react-dom": "^18.2.0",
@@ -36,7 +37,6 @@
     "react-build": "react-scripts build",
     "make": "react-scripts build && electron-forge make"
   },
-  
   "eslintConfig": {
     "extends": [
       "react-app",
