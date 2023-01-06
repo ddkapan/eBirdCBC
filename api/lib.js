@@ -5,6 +5,8 @@ const { response } = require('express');
 const MongoClient = require('mongodb').MongoClient;
 var DataFrame = require('dataframe-js').DataFrame;
 var path = require('path');
+var Datastore = require('@seald-io/nedb')
+const { resolve } = require('path');
 
 
 // getting the ebird and passwords api key from the env
@@ -14,6 +16,8 @@ const password = process.env.abbottspassword;
 
 // connecting to the mongoDB
 const url = 'mongodb://localhost:27017'
+
+const db = new Datastore();
 
 // try to get to work with multiple species at once so only have to log in once
 async function getTrack(checklist) {
@@ -31,32 +35,32 @@ async function getTrack(checklist) {
     waitUntil: "networkidle0",
   });
   console.log(page.url());
-  await page.screenshot({path: 'screenshot.png'}); // for debugging
+  await page.screenshot({ path: 'screenshot.png' }); // for debugging
   if (page.url() != 'https://ebird.org/home') {
-  await page.type('#input-user-name', password);
-  await page.screenshot({path: 'screenshot.png'}); // for debugging
-  await Promise.all([
-  await page.click('#form-submit'),
-  await page.waitForNavigation({ waitUntil: "networkidle0", timeout: 10000 }),
-  ]);
+    await page.type('#input-user-name', password);
+    await page.screenshot({ path: 'screenshot.png' }); // for debugging
+    await Promise.all([
+      await page.click('#form-submit'),
+      await page.waitForNavigation({ waitUntil: "networkidle0", timeout: 10000 }),
+    ]);
   }
 
   await page.goto(`https://ebird.org/checklist/${checklist}`, {
     waitUntil: "networkidle0"
   });
   const data = await page.evaluate(() => {
-    if (document.querySelector(".Track")){
-    return document.querySelector('.Track').dataset.maptrackData.split(',');
+    if (document.querySelector(".Track")) {
+      return document.querySelector('.Track').dataset.maptrackData.split(',');
     } else {
       return null;
     }
   });
   const points = [];
-  if (data != null){
-  for(let i = 0; i < data.length; i+=2) {
-    points.push([data[i + 1], data[i]]); // lat, long
+  if (data != null) {
+    for (let i = 0; i < data.length; i += 2) {
+      points.push([data[i + 1], data[i]]); // lat, long
+    }
   }
-}
   await browser.close();
   //console.log(points);
   return points;
@@ -93,7 +97,7 @@ async function tripReport(report) {
 }
 
 async function main(checklist) {
-  const client = new MongoClient(url);
+  //const db = new Datastore();
   // get the checklist information
   var configChecklist = {
     method: 'get',
@@ -125,6 +129,10 @@ async function main(checklist) {
     }
   };
 
+  function getRandomInt() {
+    return Math.floor(Math.random()) * 2 - 1;
+  }
+
   const loc = await axios(configLoc)
     .then(function (response) {
       const minX = response.data.bounds.minX;
@@ -133,7 +141,11 @@ async function main(checklist) {
       const minY = response.data.bounds.minY;
       const maxY = response.data.bounds.maxY;
       const lat = ((minY + maxY) / 2);
-      return [lat, long];
+      const lat_jitter = Math.random() / 2500 * getRandomInt();
+      const long_jitter = Math.random() / 2500 * getRandomInt();
+
+      const name = response.data.result;
+      return [[lat + lat_jitter, long + long_jitter], name];
     })
     .catch(function (error) {
       console.log(error);
@@ -141,77 +153,74 @@ async function main(checklist) {
 
   console.log(loc);
 
-  responseChecklist.coords = loc;
+  responseChecklist.coords = loc[0];
+
+  responseChecklist.locName = loc[1];
 
   //responseChecklist.dependent = 0;
 
   try {
-    const database = client.db("eBirdCBC");
-    const collection = database.collection("checklists");
+    //const database = client.db("eBirdCBC");
+    //const collection = database.collection("checklists");
 
     //await collection.deleteMany({}); // delete all documents in the collection
-    await collection.insertOne({ responseChecklist }); // insert the response from the api call
+    db.insert({ responseChecklist }); // insert the response from the api call
 
   } finally {
-    await client.close();
   }
 };
 
 async function clear() {
-  const client = new MongoClient(url);
   try {
-    const database = client.db("eBirdCBC");
-    const collection = database.collection("checklists");
-    await collection.deleteMany({}); // delete all documents in the collection
+    db.remove({ }, { multi: true }, function (err, numRemoved) {
+      db.loadDatabase(function (err) {
+        // done
+      });
+    });// delete all documents in the collection
   } finally {
-    await client.close();
   }
 };
 
 async function getPoints() {
-  const client = new MongoClient(url);
-  try {
-    await client.connect();
-    const database = client.db("eBirdCBC");
-    const collection = database.collection("checklists");
-    /*const IDs = await collection.distinct('_id', {}); // get the number and IDs of documents in the collection
-    console.log(IDs);
-    for(let i = 0; i < IDs.length; i++) {
-      const filter = { _id: IDs[i]};
-      const updateDoc = {
-        $set: {
-          dependent: i
-      },
-    };
-    const result = await collection.updateOne(filter, updateDoc);
-    }*/
-    const data = await collection.find({}).toArray();
-    return data;
-  } finally {
-    await client.close();
-  }
+  //const db = new Datastore();
+  //await client.connect();
+  //const database = client.db("eBirdCBC");
+  //const collection = database.collection("checklists");
+  /*const IDs = await collection.distinct('_id', {}); // get the number and IDs of documents in the collection
+  console.log(IDs);
+  for(let i = 0; i < IDs.length; i++) {
+    const filter = { _id: IDs[i]};
+    const updateDoc = {
+      $set: {
+        dependent: i
+    },
+  };
+  const result = await collection.updateOne(filter, updateDoc);
+  }*/
+const result = await db.find({});
+  return result;
+
+
 };
 
 // update == "checklistId, new dependent value"
 async function updateDep(update) {
-  const client = new MongoClient(url);
+  //const db = new Datastore();
   try {
-    await client.connect();
-    const database = client.db("eBirdCBC");
-    const collection = database.collection("checklists");
+    //await client.connect();
+    //const database = client.db("eBirdCBC");
+    //const collection = database.collection("checklists");
     const parse = update.split(",")
     let json = `{"responseChecklist.subId": "${parse[0]}"}`
-    console.log(await collection.find({}).toArray());
+    //console.log(db.find({}));
     const filter = JSON.parse(json);
     const updateDoc = {
       $set: {
         dependent: String(`${parse[1]}`)
       },
     };
-    const result = await collection.updateOne(filter, updateDoc);
-    console.log(result);
+    db.update(filter, updateDoc);
   } finally {
-    await client.close();
   }
 }
 
