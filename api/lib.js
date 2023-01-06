@@ -33,7 +33,7 @@ async function getTrack(checklist) {
   await page.screenshot({path: 'screenshot.png'}); // for debugging
   if (page.url() != 'https://ebird.org/home') {
   await page.type('#input-user-name', 'abbottslagoon');
-  await page.type('#input-password', '***REMOVED***');
+  await page.type('#input-password', '[insert password]');
   await page.screenshot({path: 'screenshot.png'}); // for debugging
   await Promise.all([
   await page.click('#form-submit'),
