@@ -5,7 +5,7 @@ const isDev = require("electron-is-dev");
 
 // runnning the api
 var child = require("child_process").execFile;
-var executablePath = path.join(__dirname, "api.exe");
+var executablePath = path.join(__dirname, "api");
 child(executablePath, function(err, data) {
     if (err) {
         console.error(err);
