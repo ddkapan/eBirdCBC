@@ -304,6 +304,30 @@ function App() {
           </Polyline>
             </>
         ))};
+        {markers.map((marker, index) => (
+          <Marker position={marker[1]} icon={icons[marker[0]]}>
+            <Popup minWidth="500" maxHeight="500">
+              <h2>Checklist ID: {marker[4]}</h2>
+              <h3>Location: {marker[8]}</h3>
+              <h3>Observer: {marker[7]}</h3>
+              <h3>Date: {marker[2]}</h3>
+              <h3>Duration: {marker[3]}</h3>
+              <h3>Checklist Comments: {marker[6]}</h3>
+              <h3>Group: {marker[0]}
+                <br></br>
+                {/*deps.map((i) => (
+                  <button value={String(`${marker[4]},${i}`)} // marker[4] is the checklist ID, i is the dependent
+                    onClick={e => updateDep(e.target.value)}>Dependent {i}</button>
+                ))*/}
+              </h3>
+              <Dropdown options={(deps.map((i) => JSON.parse(`{"value": "${marker[4]},${i}", "label": "${i}"}`)))} 
+                onChange={value => updateDep(value.value)} placeholder={marker[0]} />
+              <h3>Species: </h3>
+              <pre>{marker[5]}</pre>
+            </Popup>
+          </Marker>
+
+        ))};
       </MapContainer>
     </div>
   );
