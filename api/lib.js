@@ -257,7 +257,7 @@ async function getSpecies() {
   const deps = [];
   for (let i = 0; i < obs.length; i++) {
     for (let j = 0; j < obs[i].length; j++) {
-      const dep = data[i].dependent;
+      const dep = data[i].responseChecklist.dependent;
       deps.push(dep);
     }
   }

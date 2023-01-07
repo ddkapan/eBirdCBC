@@ -82,7 +82,7 @@ pre {
 
 .leaflet-container{
   width: 100vw;
-  height: calc(100vh - 250px);
+  height: calc(100vh - 325px);
 }
 
 .leaflet-popup-content-wrapper, .leaflet-popup-tip {
