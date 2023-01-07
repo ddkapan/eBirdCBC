@@ -21,8 +21,8 @@ function App() {
   const [deps, setdeps] = useState([]);
   //const [icon, setIcon] = useState([])
   const [map, setMap] = useState(null);
-  const [colors, setColors] = useState(0);
   const [number, setNumber] = useState(0);
+  const [species, setSpecies] = useState([]);
 
   // making different icons for each dependency
   const icons = []
@@ -42,7 +42,160 @@ function App() {
   // }
   // console.log(points);
 
+  async function speciesView(specie) {
+    const points = await axios.get(`http://localhost:9000/get-points`)
+      .then(async function (response) {
+        console.log("GOT POINTS", response.data);
 
+        // get the species from the database and format them into a string for the popup
+        const species = [];
+        for (let i = 0; i < response.data.length; i++) {
+          const speciesList = [];
+          for (let j = 0; j < response.data[i].responseChecklist.obs.length; j++) {
+            const sixcode = response.data[i].responseChecklist.obs[j].speciesCode;
+            const name = ebirdcode[sixcode];
+            if (name == specie) {
+              const count = response.data[i].responseChecklist.obs[j].howManyAtleast;
+              const code = `${name} (${count})`;
+              var comments = (response.data[i].responseChecklist.obs[j].comments);
+              if (comments === undefined) {
+                speciesList.push(`${code}`);
+              } else {
+                speciesList.push(`${code} — ${comments}`);
+              }
+            }
+
+          };
+          species.push(speciesList.join('\n'));
+        };
+
+        // get the lists that contain that species
+        const contain = [];
+        console.log(species);
+        for (let i = 0; i < species.length; i++) {
+          if (species[i] === "") {
+            contain.push(false);
+          } else {
+            contain.push(true);
+          }
+        };
+
+
+        const track = [];
+        for (let i = 0; i < response.data.length; i++) {
+          track.push(response.data[i].responseChecklist.track);
+        };
+        const locName = [];
+        for (let i = 0; i < response.data.length; i++) {
+          locName.push(response.data[i].responseChecklist.locName);
+        };
+        const coords = [];
+        for (let i = 0; i < response.data.length; i++) {
+          coords.push(response.data[i].responseChecklist.coords);
+        };
+
+        const dependent = []; // actually the count here
+        for (let i = 0; i < response.data.length; i++) {
+          const counts = [];
+          for (let j = 0; j < response.data[i].responseChecklist.obs.length; j++) {
+            const sixcode = response.data[i].responseChecklist.obs[j].speciesCode;
+            const name = ebirdcode[sixcode];
+            if (name == specie) {
+              const count = response.data[i].responseChecklist.obs[j].howManyAtleast;
+              dependent[i] = count;
+            }
+          };
+        };
+
+
+        const date = [];
+        for (let i = 0; i < response.data.length; i++) {
+
+          date.push(response.data[i].responseChecklist.obsDt);
+        };
+        const duration = [];
+        for (let i = 0; i < response.data.length; i++) {
+          duration.push(Math.round(response.data[i].responseChecklist.durationHrs * 60) + " mins");
+        };
+        const ID = [];
+        for (let i = 0; i < response.data.length; i++) {
+          ID.push(response.data[i].responseChecklist.subId);
+        };
+        const notes = [];
+        for (let i = 0; i < response.data.length; i++) {
+          notes.push(response.data[i].responseChecklist.comments);
+        };
+
+        // get the observer from the database
+        const observer = [];
+        for (let i = 0; i < response.data.length; i++) {
+          observer.push(response.data[i].responseChecklist.userDisplayName);
+        };
+
+        var colors = distinctcolors({
+          count: response.data.length,
+        });
+        for (let i = 0; i < colors.length; i++) {
+          colors[i] = colors[i].hex();
+        }
+        console.log(colors);
+        const color = [];
+        for (let i = 0; i < response.data.length; i++) {
+          color.push(colors[Number(response.data[i].responseChecklist.dependent)]);
+        };
+        return {
+          coords: coords,
+          dependent: dependent,
+          date: date,
+          duration: duration,
+          ID: ID,
+          notes: notes,
+          species: species,
+          observer: observer,
+          locName: locName,
+          track: track,
+          color: color,
+          contain: contain,
+        };
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+    console.log(points);
+    const data = zip(points.dependent, points.coords, points.date, points.duration,
+      points.ID, points.species, points.notes, points.observer, points.locName, points.track, points.color);
+    console.log("contain", points.contain)
+    const filtered_data = data.filter((r, i) => points.contain[i])
+    console.log("filtered", filtered_data);
+    setpoints(filtered_data);
+
+    const dep_arr = []; // array of dependents
+    for (let i = 0; i < data.length; i++) {
+      dep_arr.push(String(i))
+    };
+    setdeps(dep_arr);
+    await listSpecies();
+
+  }
+
+
+
+  async function listSpecies() {
+    const species = await axios.get(`http://localhost:9000/get-species`)
+      .then(function (response) {
+        console.log("GOT SPECIES", response.data);
+        return response.data;
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+
+    const speciesList = [];
+    for (let i = 0; i < species.length; i++) {
+      speciesList.push(species[i].common_name);
+    }
+    setSpecies(speciesList);
+  }
 
 
   async function getSpecies() {
@@ -133,14 +286,7 @@ function App() {
         });
     };
     const data = await findChecklist();
-    setNumber(data.length);
-    var palette = distinctcolors({
-      count: data.length,
-    });
-    for (let i = 0; i < palette.length; i++) {
-      palette[i] = palette[i].hex();
-    }
-    setColors(palette);
+
     console.log(JSON.stringify(data))
     await getChecklist(JSON.stringify(data));
     // for (let i = 0; i < data.length; i++) {
@@ -157,8 +303,9 @@ function App() {
   let getpts = async () => {
     // get the points from the database
     const points = await axios.get(`http://localhost:9000/get-points`)
-      .then(function (response) {
+      .then(async function (response) {
         console.log("GOT POINTS", response.data);
+
         const track = [];
         for (let i = 0; i < response.data.length; i++) {
           track.push(response.data[i].responseChecklist.track);
@@ -216,6 +363,14 @@ function App() {
         for (let i = 0; i < response.data.length; i++) {
           observer.push(response.data[i].responseChecklist.userDisplayName);
         };
+
+        var colors = distinctcolors({
+          count: response.data.length,
+        });
+        for (let i = 0; i < colors.length; i++) {
+          colors[i] = colors[i].hex();
+        }
+        console.log(colors);
         const color = [];
         for (let i = 0; i < response.data.length; i++) {
           color.push(colors[Number(response.data[i].responseChecklist.dependent)]);
@@ -248,7 +403,7 @@ function App() {
       dep_arr.push(String(i))
     };
     setdeps(dep_arr);
-
+    await listSpecies();
   };
 
 
@@ -270,6 +425,7 @@ function App() {
         </label>
         <input type="submit" />
       </form>
+      <Dropdown options={species} onChange={value => speciesView(value.value)} />
 
       <button onClick={clear}>Clear</button>
 
@@ -278,10 +434,11 @@ function App() {
       <button onClick={getSpecies}>Get Species</button>
 
 
+
       <MapContainer whenCreated={setMap} classname='Map' center={[38, -122]} zoom={10} scrollWheelZoom={true}>
         <TileLayer url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}" />
         {markers.map((marker, index) => (
-          <><Polyline positions={marker[9]} pathOptions={{ color:marker[10], weight:8 }} >
+          <><Polyline positions={marker[9]} pathOptions={{ color: marker[10], weight: 8 }} >
             <Popup minWidth="500" maxHeight="500">
               <h2>Checklist ID: {marker[4]}</h2>
               <h3>Location: {marker[8]}</h3>
@@ -302,7 +459,7 @@ function App() {
               <pre>{marker[5]}</pre>
             </Popup>
           </Polyline>
-            </>
+          </>
         ))};
         {markers.map((marker, index) => (
           <Marker position={marker[1]} icon={icons[marker[0]]}>
@@ -320,7 +477,7 @@ function App() {
                     onClick={e => updateDep(e.target.value)}>Dependent {i}</button>
                 ))*/}
               </h3>
-              <Dropdown options={(deps.map((i) => JSON.parse(`{"value": "${marker[4]},${i}", "label": "${i}"}`)))} 
+              <Dropdown options={(deps.map((i) => JSON.parse(`{"value": "${marker[4]},${i}", "label": "${i}"}`)))}
                 onChange={value => updateDep(value.value)} placeholder={marker[0]} />
               <h3>Species: </h3>
               <pre>{marker[5]}</pre>
