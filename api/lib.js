@@ -14,13 +14,15 @@ const key = process.env.EBIRDKEY;
 //const password = process.env.MONGO_PASSWORD;
 const password = process.env.abbottspassword;
 
+
+
 // connecting to the mongoDB
 const url = 'mongodb://localhost:27017'
 
 const db = new Datastore();
 
 // try to get to work with multiple species at once so only have to log in once
-async function getTrack(checklist) {
+async function getTrack(lists) {
   const browser = await puppeteer.launch({
     executablePath: '/usr/bin/chromium',
     headless: true,
@@ -37,33 +39,39 @@ async function getTrack(checklist) {
   console.log(page.url());
   await page.screenshot({ path: 'screenshot.png' }); // for debugging
   if (page.url() != 'https://ebird.org/home') {
-    await page.type('#input-user-name', password);
+    await page.type('#input-user-name', 'abbottslagoon');
+    await page.type('#input-password', password);
     await page.screenshot({ path: 'screenshot.png' }); // for debugging
-    await Promise.all([
-      await page.click('#form-submit'),
-      await page.waitForNavigation({ waitUntil: "networkidle0", timeout: 10000 }),
-    ]);
+    await page.click('#form-submit')
+    await page.waitForNavigation({ waitUntil: "networkidle0", timeout: 10000 })
   }
 
-  await page.goto(`https://ebird.org/checklist/${checklist}`, {
-    waitUntil: "networkidle0"
-  });
-  const data = await page.evaluate(() => {
-    if (document.querySelector(".Track")) {
-      return document.querySelector('.Track').dataset.maptrackData.split(',');
-    } else {
-      return null;
+  let all_points = [];
+
+  for (let i = 0; i < lists.length; i++) {
+    console.log('checklist', lists[i]);
+    await page.goto(`https://ebird.org/checklist/${lists[i]}`, {
+      waitUntil: "networkidle0"
+    });
+    await page.screenshot({ path: 'screenshot.png' }); // for debugging
+    const data = await page.evaluate(() => {
+      if (document.querySelector(".Track")) {
+        return document.querySelector('.Track').dataset.maptrackData.split(',');
+      } else {
+        return null;
+      }
+    });
+    const points = [];
+    if (data != null) {
+      for (let i = 0; i < data.length; i += 2) {
+        points.push([data[i + 1], data[i]]); // lat, long
+      }
     }
-  });
-  const points = [];
-  if (data != null) {
-    for (let i = 0; i < data.length; i += 2) {
-      points.push([data[i + 1], data[i]]); // lat, long
-    }
+    all_points.push(points);
   }
   await browser.close();
-  //console.log(points);
-  return points;
+  console.log(all_points);
+  return all_points;
 }
 
 async function tripReport(report) {
@@ -96,12 +104,18 @@ async function tripReport(report) {
   return data;
 }
 
-async function main(checklist) {
+async function main(checklists) {
+  const parsed = JSON.parse(checklists);
+  console.log("parsed", parsed);
+  //console.log("string", JSON.parse(checklists));
+  console.log("length", parsed.length);
+  const tracks = await getTrack(parsed); // get the tracks for all checklists
   //const db = new Datastore();
   // get the checklist information
+  for (let i = 0; i < parsed.length; i++) {
   var configChecklist = {
     method: 'get',
-    url: `https://api.ebird.org/v2/product/checklist/view/${checklist}`,
+    url: `https://api.ebird.org/v2/product/checklist/view/${parsed[i]}`,
     headers: {
       'X-eBirdApiToken': key
     }
@@ -157,22 +171,23 @@ async function main(checklist) {
 
   responseChecklist.locName = loc[1];
 
-  //responseChecklist.dependent = 0;
+  responseChecklist.track = tracks[i];
 
-  try {
+  responseChecklist.dependent = i;
+
+  
     //const database = client.db("eBirdCBC");
     //const collection = database.collection("checklists");
 
     //await collection.deleteMany({}); // delete all documents in the collection
     db.insert({ responseChecklist }); // insert the response from the api call
 
-  } finally {
   }
 };
 
 async function clear() {
   try {
-    db.remove({ }, { multi: true }, function (err, numRemoved) {
+    db.remove({}, { multi: true }, function (err, numRemoved) {
       db.loadDatabase(function (err) {
         // done
       });
@@ -197,7 +212,7 @@ async function getPoints() {
   };
   const result = await collection.updateOne(filter, updateDoc);
   }*/
-const result = await db.find({});
+  const result = await db.find({});
   return result;
 
 
@@ -206,7 +221,7 @@ const result = await db.find({});
 // update == "checklistId, new dependent value"
 async function updateDep(update) {
   //const db = new Datastore();
-  try {
+  
     //await client.connect();
     //const database = client.db("eBirdCBC");
     //const collection = database.collection("checklists");
@@ -216,12 +231,11 @@ async function updateDep(update) {
     const filter = JSON.parse(json);
     const updateDoc = {
       $set: {
-        dependent: String(`${parse[1]}`)
+        "responseChecklist.dependent": String(`${parse[1]}`)
       },
     };
     db.update(filter, updateDoc);
-  } finally {
-  }
+  
 }
 
 // getting the species list from the database
@@ -282,6 +296,6 @@ async function getSpecies() {
   return speciesListCollection;
 }
 
-// getTrack('S124180823')
+//getTrack('S124180823')
 
 module.exports = { main, clear, getPoints, updateDep, getSpecies, tripReport };
