@@ -21,6 +21,7 @@
   outline: none;
   padding: 8px 52px 8px 10px;
   transition: all 200ms ease;
+  width: 30%;
 }
 
 .rdn-control:hover {
@@ -113,7 +114,7 @@
   overflow-y: auto;
   position: absolute;
   top: 100%;
-  width: 100%;
+  width: 30%;
   z-index: 1000;
   -webkit-overflow-scrolling: touch;
 }
@@ -140,6 +141,7 @@
   cursor: pointer;
   display: block;
   padding: 8px 10px;
+  width: 100%;
 }
 
 .rdn-drop-menu-option.is-disabled-option,

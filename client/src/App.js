@@ -23,17 +23,22 @@ function App() {
   const [map, setMap] = useState(null);
   const [number, setNumber] = useState(0);
   const [species, setSpecies] = useState([]);
+  const [speciesMode, setSpeciesMode] = useState(false);
+  const [speciesForView, setSpeciesView] = useState("");
+  const [speciesMarkers, setSpeciesMarkers] = useState([]);
+  //const [speciesForViewCount, setSpeciesCount] = useState(0);
 
   // making different icons for each dependency
   const icons = []
-  for (let i = 0; i < 99; i++) {
-    const image = `https://raw.githubusercontent.com/ddkapan/eBirdCBC/main/icon_maker/icons/icon_${deps[i]}.png`
+  for (let i = 0; i < 999; i++) {
+    const image = `https://raw.githubusercontent.com/ddkapan/eBirdCBC/main/icon_maker/icons/icon_${i}.png`
     const icon = L.icon({
       iconUrl: image,
-      iconSize: [25, 41],
+      iconSize: [40, 25],
     })
     icons.push(icon);
   }
+
 
   // const track = "-122.94442559603876,38.118689842557785,-122.94443781732657,38.118694761246594,-122.94451292444381,38.11872438999384,-122.94457519316322,38.118764896093616,-122.94461636812466,38.11880381019261,-122.9446514387803,38.11884229759293,-122.94468672643106,38.11887967162067,-122.94472554168593,38.11891357605818,-122.94476906155828,38.118943906499666,-122.94482377957473,38.11897562596268,-122.94488275158218,38.11899709720089,-122.94494110121697,38.119009630890595,-122.94499876673927,38.119003741973394,-122.94505034900416,38.118976962403856,-122.94509636692642,38.11895465010632,-122.94514770875227,38.11891800420161,-122.94519045298578,38.11889125291808,-122.9452369511825,38.1188501549257,-122.94527306088017,38.11881410032078,-122.9453230111032,38.11878035152907,-122.94535051010804,38.118749070698435,-122.94539104128586,38.118701915734206,-122.94542417906722,38.11865263647799,-122.94544578940206,38.11860914256808,-122.94546838387079,38.11856382429553,-122.94551779039789,38.11854798918268,-122.94558926942766,38.11856075921959,-122.94564660015384,38.11857818244163,-122.94569964742551,38.11860201807094,-122.9457520588925,38.11862838578676,-122.94581191517058,38.11863132894263,-122.9458536088667,38.11865149510109,-122.9459172374719,38.118681533862656,-122.94596920168867,38.11870746335923,-122.94602537057072,38.11873528091637,-122.94607902450383,38.118762064494355,-122.94613857103347,38.118791694326106,-122.94619632975336,38.11880890122542,-122.94626539566985,38.11882891318081,-122.94632172324644,38.11883401242448,-122.94636774177913,38.11880304978496,-122.94641917093148,38.118790964199135,-122.94647689377388,38.1187686063512,-122.94651947566524,38.11873599655405,-122.94656298210593,38.118713505483356,-122.94661924734089,38.118682432403794,-122.9466754673496,38.11865533239648,-122.94672993538926,38.11864430186223,-122.94678423570963,38.11863514153819,-122.94685836666068,38.11863121773749,-122.94692738551012,38.11863190703135,-122.9469801435221,38.11862980182669,-122.9470501081782,38.11861714814153,-122.9470987832336,38.11862227988023,-122.94716839552287,38.11864416660812,-122.94721775431583,38.11865259381692,-122.94728093345759,38.11866463422077,-122.94733913074892,38.11869836195093,-122.94739152608133,38.11872866164526,-122.9474250311391,38.11873827658078,-122.94749202571317,38.118753282502425,-122.94757754946474,38.118751150147446,-122.94764180984069,38.11874105348363,-122.9476974106005,38.11874644889491,-122.94774965157357,38.1187751541852,-122.94779977580359,38.11880071802138,-122.94785530262982,38.11882850217774,-122.94791271673532,38.11883644556587,-122.94797982771183,38.11884626885787,-122.94804244330196,38.11886991838674,-122.94808749624008,38.1188772214811,-122.94815338795064,38.11888109227121,-122.94822775961943,38.118881155634924,-122.9482869585976,38.11888724750104,-122.94835156826834,38.11889625881645,-122.94841255444591,38.118905260150555,-122.9484661462353,38.118924784503164,-122.94853123053646,38.118937125641054,-122.9485795232453,38.1189564895858,-122.94863826703588,38.11897406871642,-122.9486932577788,38.11898426590657,-122.9487364560604,38.119007021056454,-122.94879667005341,38.11901875699805,-122.94885796425872,38.11903521946001,-122.94891322517817,38.11905699998156,-122.94897273732924,38.11908085518709,-122.94902578222789,38.11910452366949,-122.94908644768721,38.11912479099243,-122.94913830017948,38.11912919484423,-122.94920000984305,38.11914338327764,-122.94926446847164,38.119154900516165,-122.94930872877866,38.119161432771456,-122.94937412227276,38.11916313616296,-122.94943872440534,38.11917310728753,-122.94950278779001,38.11919044232765,-122.94956751438404,38.119208766302926,-122.94962750333075,38.1192181374446,-122.94968138992802,38.11922460697986,-122.94974576662824,38.11922853260588,-122.94981370030511,38.11923177379769,-122.94987182485079,38.119231948719744,-122.94993503009303,38.11923588190381,-122.94997872192008,38.11926628160405,-122.95002843064266,38.11924238046188,-122.9500793685982,38.11924107120435,-122.95014870531261,38.11924202673163,-122.95021036312879,38.11923483631861,-122.95026281713433,38.119248737903696,-122.9503273695809,38.11924179707299,-122.95036686747837,38.11923523041764,-122.95044132209922,38.11923324701997,-122.9505144478129,38.11924898945966,-122.9505641650331,38.119250737845725,-122.95064314322708,38.11925689421404,-122.95070653385955,38.119251628278874,-122.95076172495486,38.119251144060954,-122.95083088780885,38.119245633604514,-122.95087171242227,38.11924059715954,-122.95093190133292,38.119213619575724,-122.95099487481312,38.11918452354926,-122.95105094759101,38.11917059059749".split(',')
   // const points = [];
@@ -43,6 +48,7 @@ function App() {
   // console.log(points);
 
   async function speciesView(specie) {
+    setSpeciesView(specie);
     const points = await axios.get(`http://localhost:9000/get-points`)
       .then(async function (response) {
         console.log("GOT POINTS", response.data);
@@ -72,14 +78,13 @@ function App() {
         // get the lists that contain that species
         const contain = [];
         console.log(species);
-        for (let i = 0; i < species.length; i++) {
+        for (let i = 0; i < response.data.length; i++) {
           if (species[i] === "") {
             contain.push(false);
           } else {
             contain.push(true);
           }
         };
-
 
         const track = [];
         for (let i = 0; i < response.data.length; i++) {
@@ -167,7 +172,7 @@ function App() {
     console.log("contain", points.contain)
     const filtered_data = data.filter((r, i) => points.contain[i])
     console.log("filtered", filtered_data);
-    setpoints(filtered_data);
+    setSpeciesMarkers(filtered_data);
 
     const dep_arr = []; // array of dependents
     for (let i = 0; i < data.length; i++) {
@@ -194,9 +199,17 @@ function App() {
     for (let i = 0; i < species.length; i++) {
       speciesList.push(species[i].common_name);
     }
-    setSpecies(speciesList);
-  }
 
+    const counts = [];
+    for (let i = 0; i < species.length; i++) {
+      counts.push(species[i].count);
+    }
+
+    const result = {};
+    speciesList.forEach((x, i) => result[x] = counts[i]);
+    setSpecies(result);
+  }
+  //console.log("species", species);
 
   async function getSpecies() {
     // get the species from the database
@@ -425,21 +438,28 @@ function App() {
         </label>
         <input type="submit" />
       </form>
-      <Dropdown options={species} onChange={value => speciesView(value.value)} />
 
       <button onClick={clear}>Clear</button>
 
       <button onClick={getpts}>Get Points</button>
 
       <button onClick={getSpecies}>Get Species</button>
+      Species Mode
+      <input type="checkbox" checked={speciesMode} onChange={(value) => setSpeciesMode(!speciesMode)}/>
 
+      {speciesMode &&
+      <p>Total for {speciesForView}: {species[speciesForView]}</p>}
 
+      {speciesMode && 
+      <Dropdown options={Object.keys(species)} onChange={value => speciesView(value.value)} />
+      }
 
       <MapContainer whenCreated={setMap} classname='Map' center={[38, -122]} zoom={10} scrollWheelZoom={true}>
         <TileLayer url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}" />
-        {markers.map((marker, index) => (
+        {!speciesMode &&
+        markers.map((marker, index) => (
           <><Polyline positions={marker[9]} pathOptions={{ color: marker[10], weight: 8 }} >
-            <Popup minWidth="500" maxHeight="500">
+            <Popup minWidth="500" maxHeight="500" autoClose={false}>
               <h2>Checklist ID: {marker[4]}</h2>
               <h3>Location: {marker[8]}</h3>
               <h3>Observer: {marker[7]}</h3>
@@ -460,10 +480,11 @@ function App() {
             </Popup>
           </Polyline>
           </>
-        ))};
-        {markers.map((marker, index) => (
+        ))}
+        {!speciesMode &&
+        markers.map((marker, index) => (
           <Marker position={marker[1]} icon={icons[marker[0]]}>
-            <Popup minWidth="500" maxHeight="500">
+            <Popup minWidth="500" maxHeight="500" autoClose={false} >
               <h2>Checklist ID: {marker[4]}</h2>
               <h3>Location: {marker[8]}</h3>
               <h3>Observer: {marker[7]}</h3>
@@ -483,8 +504,57 @@ function App() {
               <pre>{marker[5]}</pre>
             </Popup>
           </Marker>
-
-        ))};
+        ))}
+        {speciesMode &&
+        speciesMarkers.map((marker, index) => (
+          <Marker position={marker[1]} icon={icons[marker[0]]}>
+            <Popup minWidth="500" maxHeight="500" autoClose={false} >
+              <h2>Checklist ID: {marker[4]}</h2>
+              <h3>Location: {marker[8]}</h3>
+              <h3>Observer: {marker[7]}</h3>
+              <h3>Date: {marker[2]}</h3>
+              <h3>Duration: {marker[3]}</h3>
+              <h3>Checklist Comments: {marker[6]}</h3>
+              <h3>Group: {marker[0]}
+                <br></br>
+                {/*deps.map((i) => (
+                  <button value={String(`${marker[4]},${i}`)} // marker[4] is the checklist ID, i is the dependent
+                    onClick={e => updateDep(e.target.value)}>Dependent {i}</button>
+                ))*/}
+              </h3>
+              <Dropdown options={(deps.map((i) => JSON.parse(`{"value": "${marker[4]},${i}", "label": "${i}"}`)))}
+                onChange={value => updateDep(value.value)} placeholder={marker[0]} />
+              <h3>Species: </h3>
+              <pre>{marker[5]}</pre>
+            </Popup>
+          </Marker>
+        ))
+        }
+        {speciesMode &&
+        speciesMarkers.map((marker, index) => (
+          <><Polyline positions={marker[9]} pathOptions={{ color: marker[10], weight: 8 }} >
+            <Popup minWidth="500" maxHeight="500" autoClose={false}>
+              <h2>Checklist ID: {marker[4]}</h2>
+              <h3>Location: {marker[8]}</h3>
+              <h3>Observer: {marker[7]}</h3>
+              <h3>Date: {marker[2]}</h3>
+              <h3>Duration: {marker[3]}</h3>
+              <h3>Checklist Comments: {marker[6]}</h3>
+              <h3>Group: {marker[0]}
+                <br></br>
+                {/*deps.map((i) => (
+      <button value={String(`${marker[4]},${i}`)} // marker[4] is the checklist ID, i is the dependent
+        onClick={e => updateDep(e.target.value)}>Dependent {i}</button>
+    ))*/}
+              </h3>
+              <Dropdown options={(deps.map((i) => JSON.parse(`{"value": "${marker[4]},${i}", "label": "${i}"}`)))}
+                onChange={value => updateDep(value.value)} placeholder={marker[0]} />
+              <h3>Species: </h3>
+              <pre>{marker[5]}</pre>
+            </Popup>
+          </Polyline>
+          </>
+        ))}
       </MapContainer>
     </div>
   );
