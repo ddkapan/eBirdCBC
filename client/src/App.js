@@ -73,7 +73,7 @@ function App() {
 
           };
           species.push(speciesList.join('\n'));
-        };
+        }; // I realized this is useless because we already know the species, but whatever it adds more lines of code
 
         // get the lists that contain that species
         const contain = [];
@@ -99,7 +99,7 @@ function App() {
           coords.push(response.data[i].responseChecklist.coords);
         };
 
-        const dependent = []; // actually the count here
+        const countList = []; // actually the count here
         for (let i = 0; i < response.data.length; i++) {
           const counts = [];
           for (let j = 0; j < response.data[i].responseChecklist.obs.length; j++) {
@@ -107,11 +107,22 @@ function App() {
             const name = ebirdcode[sixcode];
             if (name == specie) {
               const count = response.data[i].responseChecklist.obs[j].howManyAtleast;
-              dependent[i] = count;
+              countList[i] = count;
             }
           };
         };
 
+        const dependent = [];
+        for (let i = 0; i < response.data.length; i++) {
+          for (let j = 0; j < response.data[i].responseChecklist.obs.length; j++) {
+            const sixcode = response.data[i].responseChecklist.obs[j].speciesCode;
+            const name = ebirdcode[sixcode];
+            if (name == specie) {
+              const dep = response.data[i].responseChecklist.obs[j].speciesDependent;
+              dependent[i] = dep;
+            }
+          };
+        };
 
         const date = [];
         for (let i = 0; i < response.data.length; i++) {
@@ -137,6 +148,21 @@ function App() {
           observer.push(response.data[i].responseChecklist.userDisplayName);
         };
 
+        const listDependent = [];
+        for (let i = 0; i < response.data.length; i++) {
+          listDependent.push(response.data[i].responseChecklist.dependent);
+        };
+
+        const colorDeps = [];
+        for (let i = 0; i < response.data.length; i++) {
+          if (dependent[i] == undefined) {
+            colorDeps[i] = String(listDependent[i]);
+          } else {
+            colorDeps[i] = String(dependent[i]);
+          }
+        };
+        console.log("dependent", dependent);
+
         var colors = distinctcolors({
           count: response.data.length,
         });
@@ -146,7 +172,7 @@ function App() {
         console.log(colors);
         const color = [];
         for (let i = 0; i < response.data.length; i++) {
-          color.push(colors[Number(response.data[i].responseChecklist.dependent)]);
+          color.push(colors[Number(colorDeps[i])]);
         };
         return {
           coords: coords,
@@ -161,14 +187,15 @@ function App() {
           track: track,
           color: color,
           contain: contain,
+          counts: countList,
         };
       })
       .catch(function (error) {
         console.log(error);
       });
-    console.log(points);
+    console.log("points", points);
     const data = zip(points.dependent, points.coords, points.date, points.duration,
-      points.ID, points.species, points.notes, points.observer, points.locName, points.track, points.color);
+      points.ID, points.species, points.notes, points.observer, points.locName, points.track, points.color, points.counts);
     console.log("contain", points.contain)
     const filtered_data = data.filter((r, i) => points.contain[i])
     console.log("filtered", filtered_data);
@@ -419,6 +446,19 @@ function App() {
     await listSpecies();
   };
 
+  async function updateSpeciesDep(change) {
+    await axios.get(`http://localhost:9000/species-dep?update=${change}`)
+      .then(function (response) {
+        console.log(response);
+      })
+      .catch(function (error) {
+        console.log(error);
+      }
+      );
+    getpts();
+    speciesView(speciesForView);
+  }
+
 
   return (
     <div classname="App">
@@ -507,7 +547,7 @@ function App() {
         ))}
         {speciesMode &&
         speciesMarkers.map((marker, index) => (
-          <Marker position={marker[1]} icon={icons[marker[0]]}>
+          <Marker position={marker[1]} icon={icons[marker[11]]}>
             <Popup minWidth="500" maxHeight="500" autoClose={false} >
               <h2>Checklist ID: {marker[4]}</h2>
               <h3>Location: {marker[8]}</h3>
@@ -522,8 +562,8 @@ function App() {
                     onClick={e => updateDep(e.target.value)}>Dependent {i}</button>
                 ))*/}
               </h3>
-              <Dropdown options={(deps.map((i) => JSON.parse(`{"value": "${marker[4]},${i}", "label": "${i}"}`)))}
-                onChange={value => updateDep(value.value)} placeholder={marker[0]} />
+              <Dropdown options={(deps.map((i) => JSON.parse(`{"value": "${marker[4]},${i},${speciesForView}", "label": "${i}"}`)))}
+                onChange={value => updateSpeciesDep(value.value)} placeholder={marker[0]} />
               <h3>Species: </h3>
               <pre>{marker[5]}</pre>
             </Popup>
@@ -547,8 +587,8 @@ function App() {
         onClick={e => updateDep(e.target.value)}>Dependent {i}</button>
     ))*/}
               </h3>
-              <Dropdown options={(deps.map((i) => JSON.parse(`{"value": "${marker[4]},${i}", "label": "${i}"}`)))}
-                onChange={value => updateDep(value.value)} placeholder={marker[0]} />
+              <Dropdown options={(deps.map((i) => JSON.parse(`{"value": "${marker[4]},${i},${speciesForView}", "label": "${i}"}`)))}
+                onChange={value => updateSpeciesDep(value.value)} placeholder={marker[0]} />
               <h3>Species: </h3>
               <pre>{marker[5]}</pre>
             </Popup>
