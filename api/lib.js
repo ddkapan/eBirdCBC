@@ -13,6 +13,7 @@ const { resolve } = require('path');
 const key = process.env.EBIRDKEY;
 //const password = process.env.MONGO_PASSWORD;
 const password = process.env.abbottspassword;
+const username = process.env.abbottsusername;
 
 
 
@@ -40,7 +41,7 @@ async function getTrack(lists) {
   console.log(page.url());
   await page.screenshot({ path: 'screenshot.png' }); // for debugging
   if (page.url() != 'https://ebird.org/home') {
-    await page.type('#input-user-name', 'abbottslagoon');
+    await page.type('#input-user-name', username);
     await page.type('#input-password', password);
     await page.screenshot({ path: 'screenshot.png' }); // for debugging
     await page.click('#form-submit')
