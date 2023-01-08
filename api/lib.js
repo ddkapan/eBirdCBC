@@ -27,8 +27,8 @@ const db = new Datastore({ filename: path.join(__dirname, 'database.db'), autolo
 async function getTrack(lists) {
   const browser = await puppeteer.launch({
     executablePath: '/usr/bin/chromium',
-    headless: true,
-    devtools: true,
+    headless: false,
+    devtools: false,
     defaultViewport: {
       width: 1920,
       height: 1080,
@@ -41,11 +41,13 @@ async function getTrack(lists) {
   console.log(page.url());
   await page.screenshot({ path: 'screenshot.png' }); // for debugging
   if (page.url() != 'https://ebird.org/home') {
-    await page.type('#input-user-name', username);
-    await page.type('#input-password', password);
+    //await page.type('#input-user-name', username);
+    //await page.type('#input-password', password);
     await page.screenshot({ path: 'screenshot.png' }); // for debugging
-    await page.click('#form-submit')
-    await page.waitForNavigation({ waitUntil: "networkidle0", timeout: 10000 })
+    await Promise.all([
+     page.waitForNavigation({  timeout: 1000000 }),
+     page.click('#form-submit')
+    ]);
   }
 
   let all_points = [];
@@ -330,6 +332,13 @@ async function getSpecies() {
     names.push(ebirdcode[species[i]])
   }
 
+  // const position = [];
+  // for (let i = 0; i < species.length; i++) {
+  //   position.push(ebirdcode.findIndex(function(item, i) {
+  //     return item.name === species[i]
+  //   }))
+  // }
+// console.log(position);
   console.log(obs.length);
   //console.log(data);
   const df = new DataFrame({
