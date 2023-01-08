@@ -332,13 +332,14 @@ async function getSpecies() {
     names.push(ebirdcode[species[i]])
   }
 
-  // const position = [];
-  // for (let i = 0; i < species.length; i++) {
-  //   position.push(ebirdcode.findIndex(function(item, i) {
-  //     return item.name === species[i]
-  //   }))
-  // }
-// console.log(position);
+  const position = [];
+  for (let i = 0; i < species.length; i++) {
+    var specie = species[i];
+    var index = Object.keys(ebirdcode).indexOf(specie);
+    position.push(index);
+  }
+  console.log("posiotion", position);
+
   console.log(obs.length);
   //console.log(data);
   const df = new DataFrame({
@@ -346,9 +347,11 @@ async function getSpecies() {
     species: species,
     common_name: names,
     dependent: deps,
+    taxPos: position,
   });
   //df.show();
   console.log(df.dim());
+  df.sortBy('taxPos');
 
   const speciesList = df.groupBy('dependent', 'species', 'common_name').aggregate(group => group.stat.max('count'))
     .rename('aggregation', 'count').groupBy('species', 'common_name').aggregate(group => group.stat.sum('count')).rename('aggregation', 'count');
