@@ -46,6 +46,12 @@ app.get('/report', async function (req, res) {
     res.send(report);
 });
 
+app.get('/species-dep', async function (req, res) {
+    const update = req.query.update;
+    await funs.updateSpeciesDep(update);
+    res.send(`updated ${update} in the database`);
+});
+
 app.listen(9000, () => {
     console.log('Server listening on port 9000');
 });
