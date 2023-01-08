@@ -60,7 +60,7 @@ function App() {
           for (let j = 0; j < response.data[i].responseChecklist.obs.length; j++) {
             const sixcode = response.data[i].responseChecklist.obs[j].speciesCode;
             const name = ebirdcode[sixcode];
-            if (name == specie) {
+            if (name === specie) {
               const count = response.data[i].responseChecklist.obs[j].howManyAtleast;
               const code = `${name} (${count})`;
               var comments = (response.data[i].responseChecklist.obs[j].comments);
@@ -90,14 +90,24 @@ function App() {
         for (let i = 0; i < response.data.length; i++) {
           track.push(response.data[i].responseChecklist.track);
         };
+        console.log("tracks", track);
         const locName = [];
         for (let i = 0; i < response.data.length; i++) {
           locName.push(response.data[i].responseChecklist.locName);
         };
+
         const coords = [];
         for (let i = 0; i < response.data.length; i++) {
-          coords.push(response.data[i].responseChecklist.coords);
+          console.log("track", track[i].length === 0);
+          if (track[i].length === 0) {
+            coords.push(response.data[i].responseChecklist.coords);
+          }
+          if (track[i].length !== 0) {
+            const median = Math.floor(track[i].length / 2);
+            coords.push(track[i][median]); 
+          }
         };
+        console.log("coords", coords);
 
         const countList = []; // actually the count here
         for (let i = 0; i < response.data.length; i++) {
@@ -485,116 +495,116 @@ function App() {
 
       <button onClick={getSpecies}>Get Species</button>
       Species Mode
-      <input type="checkbox" checked={speciesMode} onChange={(value) => setSpeciesMode(!speciesMode)}/>
+      <input type="checkbox" checked={speciesMode} onChange={(value) => setSpeciesMode(!speciesMode)} />
 
       {speciesMode &&
-      <p>Total for {speciesForView}: {species[speciesForView]}</p>}
+        <p>Total for {speciesForView}: {species[speciesForView]}</p>}
 
-      {speciesMode && 
-      <Dropdown options={Object.keys(species)} onChange={value => speciesView(value.value)} />
+      {speciesMode &&
+        <Dropdown options={Object.keys(species)} onChange={value => speciesView(value.value)} />
       }
 
       <MapContainer whenCreated={setMap} classname='Map' center={[38, -122]} zoom={10} scrollWheelZoom={true}>
         <TileLayer url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}" />
         {!speciesMode &&
-        markers.map((marker, index) => (
-          <><Polyline positions={marker[9]} pathOptions={{ color: marker[10], weight: 8 }} >
-            <Popup minWidth="500" maxHeight="500" autoClose={false}>
-              <h2>Checklist ID: {marker[4]}</h2>
-              <h3>Location: {marker[8]}</h3>
-              <h3>Observer: {marker[7]}</h3>
-              <h3>Date: {marker[2]}</h3>
-              <h3>Duration: {marker[3]}</h3>
-              <h3>Checklist Comments: {marker[6]}</h3>
-              <h3>Group: {marker[0]}
-                <br></br>
-                {/*deps.map((i) => (
+          markers.map((marker, index) => (
+            <><Polyline positions={marker[9]} pathOptions={{ color: marker[10], weight: 8 }} >
+              <Popup minWidth="500" maxHeight="500" autoClose={false}>
+                <h2>Checklist ID: {marker[4]}</h2>
+                <h3>Location: {marker[8]}</h3>
+                <h3>Observer: {marker[7]}</h3>
+                <h3>Date: {marker[2]}</h3>
+                <h3>Duration: {marker[3]}</h3>
+                <h3>Checklist Comments: {marker[6]}</h3>
+                <h3>Group: {marker[0]}
+                  <br></br>
+                  {/*deps.map((i) => (
       <button value={String(`${marker[4]},${i}`)} // marker[4] is the checklist ID, i is the dependent
         onClick={e => updateDep(e.target.value)}>Dependent {i}</button>
     ))*/}
-              </h3>
-              <Dropdown options={(deps.map((i) => JSON.parse(`{"value": "${marker[4]},${i}", "label": "${i}"}`)))}
-                onChange={value => updateDep(value.value)} placeholder={marker[0]} />
-              <h3>Species: </h3>
-              <pre>{marker[5]}</pre>
-            </Popup>
-          </Polyline>
-          </>
-        ))}
+                </h3>
+                <Dropdown options={(deps.map((i) => JSON.parse(`{"value": "${marker[4]},${i}", "label": "${i}"}`)))}
+                  onChange={value => updateDep(value.value)} placeholder={marker[0]} />
+                <h3>Species: </h3>
+                <pre>{marker[5]}</pre>
+              </Popup>
+            </Polyline>
+            </>
+          ))}
         {!speciesMode &&
-        markers.map((marker, index) => (
-          <Marker position={marker[1]} icon={icons[marker[0]]}>
-            <Popup minWidth="500" maxHeight="500" autoClose={false} >
-              <h2>Checklist ID: {marker[4]}</h2>
-              <h3>Location: {marker[8]}</h3>
-              <h3>Observer: {marker[7]}</h3>
-              <h3>Date: {marker[2]}</h3>
-              <h3>Duration: {marker[3]}</h3>
-              <h3>Checklist Comments: {marker[6]}</h3>
-              <h3>Group: {marker[0]}
-                <br></br>
-                {/*deps.map((i) => (
+          markers.map((marker, index) => (
+            <Marker position={marker[1]} icon={icons[marker[0]]}>
+              <Popup minWidth="500" maxHeight="500" autoClose={false} >
+                <h2>Checklist ID: {marker[4]}</h2>
+                <h3>Location: {marker[8]}</h3>
+                <h3>Observer: {marker[7]}</h3>
+                <h3>Date: {marker[2]}</h3>
+                <h3>Duration: {marker[3]}</h3>
+                <h3>Checklist Comments: {marker[6]}</h3>
+                <h3>Group: {marker[0]}
+                  <br></br>
+                  {/*deps.map((i) => (
                   <button value={String(`${marker[4]},${i}`)} // marker[4] is the checklist ID, i is the dependent
                     onClick={e => updateDep(e.target.value)}>Dependent {i}</button>
                 ))*/}
-              </h3>
-              <Dropdown options={(deps.map((i) => JSON.parse(`{"value": "${marker[4]},${i}", "label": "${i}"}`)))}
-                onChange={value => updateDep(value.value)} placeholder={marker[0]} />
-              <h3>Species: </h3>
-              <pre>{marker[5]}</pre>
-            </Popup>
-          </Marker>
-        ))}
+                </h3>
+                <Dropdown options={(deps.map((i) => JSON.parse(`{"value": "${marker[4]},${i}", "label": "${i}"}`)))}
+                  onChange={value => updateDep(value.value)} placeholder={marker[0]} />
+                <h3>Species: </h3>
+                <pre>{marker[5]}</pre>
+              </Popup>
+            </Marker>
+          ))}
         {speciesMode &&
-        speciesMarkers.map((marker, index) => (
-          <Marker position={marker[1]} icon={icons[marker[11]]}>
-            <Popup minWidth="500" maxHeight="500" autoClose={false} >
-              <h2>Checklist ID: {marker[4]}</h2>
-              <h3>Location: {marker[8]}</h3>
-              <h3>Observer: {marker[7]}</h3>
-              <h3>Date: {marker[2]}</h3>
-              <h3>Duration: {marker[3]}</h3>
-              <h3>Checklist Comments: {marker[6]}</h3>
-              <h3>Group: {marker[0]}
-                <br></br>
-                {/*deps.map((i) => (
+          speciesMarkers.map((marker, index) => (
+            <Marker position={marker[1]} icon={icons[marker[11]]}>
+              <Popup minWidth="500" maxHeight="500" autoClose={false} >
+                <h2>Checklist ID: {marker[4]}</h2>
+                <h3>Location: {marker[8]}</h3>
+                <h3>Observer: {marker[7]}</h3>
+                <h3>Date: {marker[2]}</h3>
+                <h3>Duration: {marker[3]}</h3>
+                <h3>Checklist Comments: {marker[6]}</h3>
+                <h3>Group: {marker[0]}
+                  <br></br>
+                  {/*deps.map((i) => (
                   <button value={String(`${marker[4]},${i}`)} // marker[4] is the checklist ID, i is the dependent
                     onClick={e => updateDep(e.target.value)}>Dependent {i}</button>
                 ))*/}
-              </h3>
-              <Dropdown options={(deps.map((i) => JSON.parse(`{"value": "${marker[4]},${i},${speciesForView}", "label": "${i}"}`)))}
-                onChange={value => updateSpeciesDep(value.value)} placeholder={marker[0]} />
-              <h3>Species: </h3>
-              <pre>{marker[5]}</pre>
-            </Popup>
-          </Marker>
-        ))
+                </h3>
+                <Dropdown options={(deps.map((i) => JSON.parse(`{"value": "${marker[4]},${i},${speciesForView}", "label": "${i}"}`)))}
+                  onChange={value => updateSpeciesDep(value.value)} placeholder={marker[0]} />
+                <h3>Species: </h3>
+                <pre>{marker[5]}</pre>
+              </Popup>
+            </Marker>
+          ))
         }
         {speciesMode &&
-        speciesMarkers.map((marker, index) => (
-          <><Polyline positions={marker[9]} pathOptions={{ color: marker[10], weight: 8 }} >
-            <Popup minWidth="500" maxHeight="500" autoClose={false}>
-              <h2>Checklist ID: {marker[4]}</h2>
-              <h3>Location: {marker[8]}</h3>
-              <h3>Observer: {marker[7]}</h3>
-              <h3>Date: {marker[2]}</h3>
-              <h3>Duration: {marker[3]}</h3>
-              <h3>Checklist Comments: {marker[6]}</h3>
-              <h3>Group: {marker[0]}
-                <br></br>
-                {/*deps.map((i) => (
+          speciesMarkers.map((marker, index) => (
+            <><Polyline positions={marker[9]} pathOptions={{ color: marker[10], weight: 8 }} >
+              <Popup minWidth="500" maxHeight="500" autoClose={false}>
+                <h2>Checklist ID: {marker[4]}</h2>
+                <h3>Location: {marker[8]}</h3>
+                <h3>Observer: {marker[7]}</h3>
+                <h3>Date: {marker[2]}</h3>
+                <h3>Duration: {marker[3]}</h3>
+                <h3>Checklist Comments: {marker[6]}</h3>
+                <h3>Group: {marker[0]}
+                  <br></br>
+                  {/*deps.map((i) => (
       <button value={String(`${marker[4]},${i}`)} // marker[4] is the checklist ID, i is the dependent
         onClick={e => updateDep(e.target.value)}>Dependent {i}</button>
     ))*/}
-              </h3>
-              <Dropdown options={(deps.map((i) => JSON.parse(`{"value": "${marker[4]},${i},${speciesForView}", "label": "${i}"}`)))}
-                onChange={value => updateSpeciesDep(value.value)} placeholder={marker[0]} />
-              <h3>Species: </h3>
-              <pre>{marker[5]}</pre>
-            </Popup>
-          </Polyline>
-          </>
-        ))}
+                </h3>
+                <Dropdown options={(deps.map((i) => JSON.parse(`{"value": "${marker[4]},${i},${speciesForView}", "label": "${i}"}`)))}
+                  onChange={value => updateSpeciesDep(value.value)} placeholder={marker[0]} />
+                <h3>Species: </h3>
+                <pre>{marker[5]}</pre>
+              </Popup>
+            </Polyline>
+            </>
+          ))}
       </MapContainer>
     </div>
   );
