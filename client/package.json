@@ -39,6 +39,25 @@
     "react-build": "react-scripts build",
     "make": "react-scripts build && electron-forge make"
   },
+  "build": {
+    "appId": "com.ebird.cbc-compiler",
+    "productName": "CBC Compiler",
+    "files": [
+      "build/**/*"
+    ],
+    "mac": {
+      "category": "public.app-category.utilities",
+      "target": [
+        "dmg",
+        "zip"
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ]
+    }
+  },
   "eslintConfig": {
     "extends": [
       "react-app",
