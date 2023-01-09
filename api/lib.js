@@ -13,18 +13,22 @@ const { resolve } = require('path');
 const key = process.env.EBIRDKEY;
 //const password = process.env.MONGO_PASSWORD;
 const password = process.env.abbottspassword;
+const username = process.env.abbottsusername;
+
+
 
 // connecting to the mongoDB
 const url = 'mongodb://localhost:27017'
 
-const db = new Datastore();
+// saving the db for faster degugging
+const db = new Datastore({ filename: path.join(__dirname, 'database.db'), autoload: true });
 
 // try to get to work with multiple species at once so only have to log in once
-async function getTrack(checklist) {
+async function getTrack(lists) {
   const browser = await puppeteer.launch({
     executablePath: '/usr/bin/chromium',
-    headless: true,
-    devtools: true,
+    headless: false,
+    devtools: false,
     defaultViewport: {
       width: 1920,
       height: 1080,
@@ -37,33 +41,41 @@ async function getTrack(checklist) {
   console.log(page.url());
   await page.screenshot({ path: 'screenshot.png' }); // for debugging
   if (page.url() != 'https://ebird.org/home') {
-    await page.type('#input-user-name', password);
+    //await page.type('#input-user-name', username);
+    //await page.type('#input-password', password);
     await page.screenshot({ path: 'screenshot.png' }); // for debugging
     await Promise.all([
-      await page.click('#form-submit'),
-      await page.waitForNavigation({ waitUntil: "networkidle0", timeout: 10000 }),
+     page.waitForNavigation({  timeout: 1000000 }),
+     page.click('#form-submit')
     ]);
   }
 
-  await page.goto(`https://ebird.org/checklist/${checklist}`, {
-    waitUntil: "networkidle0"
-  });
-  const data = await page.evaluate(() => {
-    if (document.querySelector(".Track")) {
-      return document.querySelector('.Track').dataset.maptrackData.split(',');
-    } else {
-      return null;
+  let all_points = [];
+
+  for (let i = 0; i < lists.length; i++) {
+    console.log('checklist', lists[i]);
+    await page.goto(`https://ebird.org/checklist/${lists[i]}`, {
+      waitUntil: "networkidle0"
+    });
+    await page.screenshot({ path: 'screenshot.png' }); // for debugging
+    const data = await page.evaluate(() => {
+      if (document.querySelector(".Track")) {
+        return document.querySelector('.Track').dataset.maptrackData.split(',');
+      } else {
+        return null;
+      }
+    });
+    const points = [];
+    if (data != null) {
+      for (let i = 0; i < data.length; i += 2) {
+        points.push([data[i + 1], data[i]]); // lat, long
+      }
     }
-  });
-  const points = [];
-  if (data != null) {
-    for (let i = 0; i < data.length; i += 2) {
-      points.push([data[i + 1], data[i]]); // lat, long
-    }
+    all_points.push(points);
   }
   await browser.close();
-  //console.log(points);
-  return points;
+  console.log(all_points);
+  return all_points;
 }
 
 async function tripReport(report) {
@@ -96,83 +108,90 @@ async function tripReport(report) {
   return data;
 }
 
-async function main(checklist) {
+async function main(checklists) {
+  const parsed = JSON.parse(checklists);
+  console.log("parsed", parsed);
+  //console.log("string", JSON.parse(checklists));
+  console.log("length", parsed.length);
+  const tracks = await getTrack(parsed); // get the tracks for all checklists
   //const db = new Datastore();
   // get the checklist information
-  var configChecklist = {
-    method: 'get',
-    url: `https://api.ebird.org/v2/product/checklist/view/${checklist}`,
-    headers: {
-      'X-eBirdApiToken': key
+  for (let i = 0; i < parsed.length; i++) {
+    var configChecklist = {
+      method: 'get',
+      url: `https://api.ebird.org/v2/product/checklist/view/${parsed[i]}`,
+      headers: {
+        'X-eBirdApiToken': key
+      }
+    };
+
+    const responseChecklist = await axios(configChecklist)
+      .then(function (response) {
+        return response.data;
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+
+    // get the checklist locId
+    const location = responseChecklist.locId;
+
+    console.log(location);
+
+    // use the locId to get the coords of the location
+    var configLoc = {
+      method: 'get',
+      url: `https://api.ebird.org/v2/ref/region/info/${location}`,
+      headers: {
+        'X-eBirdApiToken': key
+      }
+    };
+
+    function getRandomInt() {
+      return Math.floor(Math.random()) * 2 - 1;
     }
-  };
 
-  const responseChecklist = await axios(configChecklist)
-    .then(function (response) {
-      return response.data;
-    })
-    .catch(function (error) {
-      console.log(error);
-    });
+    const loc = await axios(configLoc)
+      .then(function (response) {
+        const minX = response.data.bounds.minX;
+        const maxX = response.data.bounds.maxX;
+        const long = ((minX + maxX) / 2);
+        const minY = response.data.bounds.minY;
+        const maxY = response.data.bounds.maxY;
+        const lat = ((minY + maxY) / 2);
+        const lat_jitter = Math.random() / 2500 * getRandomInt();
+        const long_jitter = Math.random() / 2500 * getRandomInt();
 
-  // get the checklist locId
-  const location = responseChecklist.locId;
+        const name = response.data.result;
+        return [[lat + lat_jitter, long + long_jitter], name];
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
 
-  console.log(location);
+    console.log(loc);
 
-  // use the locId to get the coords of the location
-  var configLoc = {
-    method: 'get',
-    url: `https://api.ebird.org/v2/ref/region/info/${location}`,
-    headers: {
-      'X-eBirdApiToken': key
-    }
-  };
+    responseChecklist.coords = loc[0];
 
-  function getRandomInt() {
-    return Math.floor(Math.random()) * 2 - 1;
-  }
+    responseChecklist.locName = loc[1];
 
-  const loc = await axios(configLoc)
-    .then(function (response) {
-      const minX = response.data.bounds.minX;
-      const maxX = response.data.bounds.maxX;
-      const long = ((minX + maxX) / 2);
-      const minY = response.data.bounds.minY;
-      const maxY = response.data.bounds.maxY;
-      const lat = ((minY + maxY) / 2);
-      const lat_jitter = Math.random() / 2500 * getRandomInt();
-      const long_jitter = Math.random() / 2500 * getRandomInt();
+    responseChecklist.track = tracks[i];
 
-      const name = response.data.result;
-      return [[lat + lat_jitter, long + long_jitter], name];
-    })
-    .catch(function (error) {
-      console.log(error);
-    });
+    responseChecklist.dependent = i;
 
-  console.log(loc);
 
-  responseChecklist.coords = loc[0];
-
-  responseChecklist.locName = loc[1];
-
-  //responseChecklist.dependent = 0;
-
-  try {
     //const database = client.db("eBirdCBC");
     //const collection = database.collection("checklists");
 
     //await collection.deleteMany({}); // delete all documents in the collection
     db.insert({ responseChecklist }); // insert the response from the api call
 
-  } finally {
   }
 };
 
 async function clear() {
   try {
-    db.remove({ }, { multi: true }, function (err, numRemoved) {
+    db.remove({}, { multi: true }, function (err, numRemoved) {
       db.loadDatabase(function (err) {
         // done
       });
@@ -197,31 +216,60 @@ async function getPoints() {
   };
   const result = await collection.updateOne(filter, updateDoc);
   }*/
-const result = await db.find({});
+  const result = await db.find({});
   return result;
 
 
 };
 
+// update species dependency
+// update == "checklistId, new dependent value, species"
+// we need to convert from the common name to the species code
+async function updateSpeciesDep(update) {
+  const parse = update.split(",")
+  console.log(parse);
+  const speciesCode = Object.keys(ebirdcode).find(key => ebirdcode[key] === parse[2]); // get the species code from the common name
+  
+  // nedb doesn't support positional operators ($) so we need to get the data and find the position of the species
+  const result = await db.find({ "responseChecklist.subId": parse[0] });
+  const obs = result[0].responseChecklist.obs;
+  console.log(obs);
+  let position = 0;
+  for (let i = 0; i < obs.length; i++) {
+    if (obs[i].speciesCode === speciesCode) {
+      position = i;
+    }
+  }
+  let json = `{"responseChecklist.subId": "${parse[0]}", "responseChecklist.obs.speciesCode": "${speciesCode}"}`
+  const filter = JSON.parse(json);
+  console.log(filter);
+  const updateDoc = {
+    $set: {
+      [`responseChecklist.obs.${position}.speciesDependent`]: `${parse[1]}`,
+    },
+  }
+  console.log(updateDoc);
+  await db.updateAsync(filter, updateDoc);
+}
+
 // update == "checklistId, new dependent value"
 async function updateDep(update) {
   //const db = new Datastore();
-  try {
-    //await client.connect();
-    //const database = client.db("eBirdCBC");
-    //const collection = database.collection("checklists");
-    const parse = update.split(",")
-    let json = `{"responseChecklist.subId": "${parse[0]}"}`
-    //console.log(db.find({}));
-    const filter = JSON.parse(json);
-    const updateDoc = {
-      $set: {
-        dependent: String(`${parse[1]}`)
-      },
-    };
-    db.update(filter, updateDoc);
-  } finally {
-  }
+
+  //await client.connect();
+  //const database = client.db("eBirdCBC");
+  //const collection = database.collection("checklists");
+  const parse = update.split(",")
+  let json = `{"responseChecklist.subId": "${parse[0]}"}`
+  //console.log(db.find({}));
+  const filter = JSON.parse(json);
+  const updateDoc = {
+    $set: {
+      "responseChecklist.dependent": String(`${parse[1]}`)
+    },
+  };
+  db.update(filter, updateDoc);
+
 }
 
 // getting the species list from the database
@@ -239,15 +287,36 @@ async function getSpecies() {
     }
     obs.push(species);
   }
-  // get the deps
+  // get the deps on a species level first
+  const speciesDeps = [];
+  for (let i = 0; i < data.length; i++) {
+    for(let j = 0; j < data[i].responseChecklist.obs.length; j++) {
+    const dep = data[i].responseChecklist.obs[j].speciesDependent;
+    speciesDeps.push(dep);
+    }
+  }
+  //console.log("speciesDeps", speciesDeps);
+
+  // get the deps on a checklist level
   const deps = [];
   for (let i = 0; i < obs.length; i++) {
     for (let j = 0; j < obs[i].length; j++) {
-      const dep = data[i].dependent;
+      const dep = data[i].responseChecklist.dependent;
       deps.push(dep);
     }
   }
-  console.log(deps);
+  console.log("deps", deps);
+
+  for(let i = 0; i < deps.length; i++) {
+    if (speciesDeps[i] != undefined) {
+      deps[i] = speciesDeps[i];
+    }
+  }
+
+  console.log("true", deps.length == speciesDeps.length)
+
+
+
   // take from "GCKI: 1" to {species: "GCKI", count: 1}
   var obs = obs.flat(1)
   const species = [];
@@ -263,6 +332,14 @@ async function getSpecies() {
     names.push(ebirdcode[species[i]])
   }
 
+  const position = [];
+  for (let i = 0; i < species.length; i++) {
+    var specie = species[i];
+    var index = Object.keys(ebirdcode).indexOf(specie);
+    position.push(index);
+  }
+  console.log("posiotion", position);
+
   console.log(obs.length);
   //console.log(data);
   const df = new DataFrame({
@@ -270,9 +347,11 @@ async function getSpecies() {
     species: species,
     common_name: names,
     dependent: deps,
+    taxPos: position,
   });
-  df.show();
+  //df.show();
   console.log(df.dim());
+  df.sortBy('taxPos');
 
   const speciesList = df.groupBy('dependent', 'species', 'common_name').aggregate(group => group.stat.max('count'))
     .rename('aggregation', 'count').groupBy('species', 'common_name').aggregate(group => group.stat.sum('count')).rename('aggregation', 'count');
@@ -282,6 +361,6 @@ async function getSpecies() {
   return speciesListCollection;
 }
 
-// getTrack('S124180823')
+//getTrack('S124180823')
 
-module.exports = { main, clear, getPoints, updateDep, getSpecies, tripReport };
+module.exports = { main, clear, getPoints, updateDep, getSpecies, tripReport, updateSpeciesDep };

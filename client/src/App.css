@@ -1,9 +1,24 @@
 @import url('https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap');
 
+
+.leaflet-container .leaflet-marker-pane img, .leaflet-container .leaflet-shadow-pane img, .leaflet-container .leaflet-tile-pane img, .leaflet-container img.leaflet-image-layer, .leaflet-container .leaflet-tile {
+  max-width: none !important;
+  max-height: none !important;
+  width: 40px;
+  height: 25px;
+  padding: 0;
+}
+
+
+
+
+
+
 button:hover{
   background: #c51f5d;
   color: #243447;
 }
+
 
 
 button {
@@ -81,7 +96,7 @@ pre {
 
 .leaflet-container{
   width: 100vw;
-  height: calc(100vh - 250px);
+  height: calc(100vh - 325px);
 }
 
 .leaflet-popup-content-wrapper, .leaflet-popup-tip {
