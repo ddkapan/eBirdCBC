@@ -16,6 +16,7 @@
     "axios": "^1.2.1",
     "chroma-js": "^2.4.2",
     "distinct-colors": "^3.0.0",
+    "dmg-builder": "^24.0.0-alpha.9",
     "electron-is-dev": "^2.0.0",
     "fast-xml-parser": "^4.0.12",
     "json-2-csv": "^3.18.0",
@@ -45,11 +46,13 @@
     "files": [
       "build/**/*"
     ],
+    "directories": {
+      "buildResources": "resources"
+    },
     "mac": {
       "category": "public.app-category.utilities",
       "target": [
-        "dmg",
-        "zip"
+        "dmg"
       ]
     },
     "linux": {
