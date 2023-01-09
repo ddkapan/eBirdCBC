@@ -365,13 +365,13 @@ function App() {
     const data = await findChecklist();
 
     console.log(JSON.stringify(data))
-    await getChecklist(JSON.stringify(data));
+    let ignore = await getChecklist(JSON.stringify(data));
     // for (let i = 0; i < data.length; i++) {
     //     await updateDep(`${data[i]},${i}`);
     //   console.log("added", String(`${data[i]},${i}`));
     // };
 
-    await getpts();
+    await getpts(ignore);
 
   }
 
@@ -509,7 +509,7 @@ function App() {
     <div classname="App">
       <h3>Christmas Bird Count Compiler</h3>
       1.) Input the checklist IDs or trip report number in the text box. Then submit. <br></br>
-      3.) Sign into your account when the window open. Do not touch the chrome window while it collects the tracks. Once it finishes, wait a few seconds and click 'Get Points' to get the points. <br></br>
+      3.) Sign into your account when the window open. Do not touch the chrome window while it collects the tracks. <br></br>
       3.) Navigate to the points and click on them to see the species and notes. Select the 'group' status for each point to group overlapping points together.<br></br>
       4.) Species Mode allows you to go species by species when grouping checklists. <br></br>
       5.) Click "Get Species" to get the species from the database and compile them into a CSV file that will download.<br></br>

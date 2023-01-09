@@ -6,7 +6,7 @@ const isDev = require("electron-is-dev");
 // runnning the api
 var child = require("child_process").execFile;
 var executablePath = path.join(__dirname, "api");
-child(executablePath, function(err, data) {
+let api = child(executablePath, function(err, data) {
     if (err) {
         console.error(err);
         return;
@@ -50,6 +50,7 @@ app.whenReady().then(createWindow);
 // explicitly with Cmd + Q.
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
+    api.kill();
     app.quit();
   }
 });

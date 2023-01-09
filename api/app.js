@@ -11,10 +11,10 @@ app.use(cors());
 const funs = require('./lib.js');
 
 
-app.put('/add-check', (req, res) => {
+app.put('/add-check', async (req, res) => {
     const checklist = req.query.checklist;
     console.log(checklist.data);
-    funs.main(checklist);
+    await funs.main(checklist);
     res.send(`inputted ${checklist} into the database`);
 });
 

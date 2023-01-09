@@ -7,6 +7,7 @@ var DataFrame = require('dataframe-js').DataFrame;
 var path = require('path');
 var Datastore = require('@seald-io/nedb')
 const { resolve } = require('path');
+const ebirdTaxonomy = require("./public/ebirdTaxOrder.json")
 
 
 // getting the ebird and passwords api key from the env
@@ -28,11 +29,7 @@ async function getTrack(lists) {
   const browser = await puppeteer.launch({
     executablePath: '/usr/bin/chromium',
     headless: false,
-    devtools: false,
-    defaultViewport: {
-      width: 1920,
-      height: 1080,
-    }
+    devtools: false
   });
   const page = await browser.newPage();
   await page.goto('https://secure.birds.cornell.edu/cassso/login?service=https%3A%2F%2Febird.org%2Flogin%2Fcas%3Fportal%3Debird&locale=en_US', {
@@ -46,7 +43,7 @@ async function getTrack(lists) {
     await page.screenshot({ path: 'screenshot.png' }); // for debugging
     await Promise.all([
      page.waitForNavigation({  timeout: 1000000 }),
-     page.click('#form-submit')
+     //page.click('#form-submit')
     ]);
   }
 
@@ -334,9 +331,7 @@ async function getSpecies() {
 
   const position = [];
   for (let i = 0; i < species.length; i++) {
-    var specie = species[i];
-    var index = Object.keys(ebirdcode).indexOf(specie);
-    position.push(index);
+    position.push(ebirdTaxonomy[species[i]]);
   }
   console.log("posiotion", position);
 

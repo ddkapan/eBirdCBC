@@ -136,3 +136,4 @@ screenshot*
 .git*/
 password.txt
 app
+api/build/
