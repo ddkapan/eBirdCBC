@@ -7,6 +7,7 @@
 
 .rdn {
   position: relative;
+  display: inline-flex;
 }
 
 .rdn-control {
@@ -21,7 +22,7 @@
   outline: none;
   padding: 8px 52px 8px 10px;
   transition: all 200ms ease;
-  width: 30%;
+  width: 300px;
 }
 
 .rdn-control:hover {
@@ -110,11 +111,11 @@
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
   box-sizing: border-box;
   margin-top: -1px;
-  max-height: 200px;
+  max-height: 300px;
   overflow-y: auto;
   position: absolute;
   top: 100%;
-  width: 30%;
+  width: 300px;
   z-index: 1000;
   -webkit-overflow-scrolling: touch;
 }
