@@ -118,7 +118,7 @@ function App() {
           }
           if (track[i].length !== 0) {
             const median = Math.floor(track[i].length / 2);
-            coords.push(track[i][median]); 
+            coords.push(track[i][median]);
           }
         };
         console.log("coords", coords);
@@ -399,7 +399,7 @@ function App() {
           }
           if (track[i].length !== 0) {
             const median = Math.floor(track[i].length / 2);
-            coords.push(track[i][median]); 
+            coords.push(track[i][median]);
           }
         };
         const dependent = [];
@@ -507,11 +507,12 @@ function App() {
 
   return (
     <div classname="App">
-      <h2>Christmas Bird Count Compiler</h2>
-      1.) Input the checklist IDs separated by commas in the text box. Then click submit to add them to the database.<br></br>
-      2.) If you want to to submit additional points, please clear the database and add all of the points. <br></br>
-      3.) Navigate to the points and click on them to see the species and notes. Select the 'dependent' status for each point to group overlapping points together.<br></br>
-      4.) Click "Get Species" to get the species from the database and compile them into a CSV file that will download.<br></br>
+      <h3>Christmas Bird Count Compiler</h3>
+      1.) Input the checklist IDs or trip report number in the text box. Then submit. <br></br>
+      3.) Sign into your account when the window open. Do not touch the chrome window while it collects the tracks. Once it finishes, wait a few seconds and click 'Get Points' to get the points. <br></br>
+      3.) Navigate to the points and click on them to see the species and notes. Select the 'group' status for each point to group overlapping points together.<br></br>
+      4.) Species Mode allows you to go species by species when grouping checklists. <br></br>
+      5.) Click "Get Species" to get the species from the database and compile them into a CSV file that will download.<br></br>
       <form onSubmit={handleSubmit}>
         <label>
           <input
@@ -526,9 +527,13 @@ function App() {
 
       <button onClick={clear}>Clear</button>
 
-      <button onClick={getpts}>Get Points</button>
 
+      {!speciesMode &&
+        <button onClick={getpts}>Get Points</button>
+      }
       <button onClick={getSpecies}>Get Species</button>
+
+
       Species Mode
       <input type="checkbox" checked={speciesMode} onChange={(value) => setSpeciesMode(!speciesMode)} />
 
