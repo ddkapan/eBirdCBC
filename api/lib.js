@@ -11,12 +11,20 @@ const ebirdTaxonomy = require("./public/ebirdTaxOrder.json")
 
 
 // getting the ebird and passwords api key from the env
-const key = process.env.EBIRDKEY;
+//const key = process.env.EBIRDKEY;
 //const password = process.env.MONGO_PASSWORD;
 const password = process.env.abbottspassword;
 const username = process.env.abbottsusername;
 
+let chromePath;
 
+if (process.platform === 'darwin') {
+  chromePath = '/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome';
+}
+
+if (process.platform === 'linux') {
+  chromePath = '/usr/bin/google-chrome';
+}
 
 // connecting to the mongoDB
 const url = 'mongodb://localhost:27017'
@@ -27,7 +35,7 @@ const db = new Datastore({ filename: path.join(__dirname, 'database.db'), autolo
 // try to get to work with multiple species at once so only have to log in once
 async function getTrack(lists) {
   const browser = await puppeteer.launch({
-    executablePath: '/usr/bin/chromium',
+    executablePath: chromePath,
     headless: false,
     devtools: false
   });
@@ -36,11 +44,11 @@ async function getTrack(lists) {
     waitUntil: "networkidle0",
   });
   console.log(page.url());
-  await page.screenshot({ path: 'screenshot.png' }); // for debugging
+  //await page.screenshot({ path: 'screenshot.png' }); // for debugging
   if (page.url() != 'https://ebird.org/home') {
     //await page.type('#input-user-name', username);
     //await page.type('#input-password', password);
-    await page.screenshot({ path: 'screenshot.png' }); // for debugging
+    //await page.screenshot({ path: 'screenshot.png' }); // for debugging
     await Promise.all([
      page.waitForNavigation({  timeout: 1000000 }),
      //page.click('#form-submit')
@@ -54,7 +62,7 @@ async function getTrack(lists) {
     await page.goto(`https://ebird.org/checklist/${lists[i]}`, {
       waitUntil: "networkidle0"
     });
-    await page.screenshot({ path: 'screenshot.png' }); // for debugging
+    //await page.screenshot({ path: 'screenshot.png' }); // for debugging
     const data = await page.evaluate(() => {
       if (document.querySelector(".Track")) {
         return document.querySelector('.Track').dataset.maptrackData.split(',');
@@ -77,13 +85,9 @@ async function getTrack(lists) {
 
 async function tripReport(report) {
   const browser = await puppeteer.launch({
-    executablePath: '/usr/bin/chromium',
+    executablePath: chromePath,
     headless: true,
-    devtools: true,
-    defaultViewport: {
-      width: 1920,
-      height: 1080,
-    }
+    devtools: true
   });
   const page = await browser.newPage();
   await page.goto(`https://ebird.org/tripreport/${report}?view=checklists`, {
