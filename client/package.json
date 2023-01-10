@@ -28,12 +28,7 @@
     "react-dom": "^18.2.0",
     "react-dropdown-now": "^6.0.1",
     "react-leaflet": "^4.2.0",
-<<<<<<< HEAD
     "react-scripts": "5.0.1",
-=======
-    "react-scripts": "^5.0.1",
-    "sharp": "^0.31.3",
->>>>>>> 55d1624 (added changes to GIS branch)
     "web-vitals": "^2.1.4"
   },
   "scripts": {
