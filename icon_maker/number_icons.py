@@ -20,3 +20,12 @@ def add_number(number):
  
 for i in range(0, n):
     add_number(str(i))
+
+def red_x():
+    image = Image.new('RGBA', (110,110), (0,0,0,0))
+    draw=ImageDraw.Draw(image)
+    draw.line((5, 5, 100, 100), fill=(255, 0, 0), width=10)
+    draw.line((5, 100, 100, 5), fill=(255, 0, 0), width=10)
+    image.save("./icons/red_x.png")
+
+red_x()
