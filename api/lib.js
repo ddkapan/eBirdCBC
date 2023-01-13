@@ -11,7 +11,7 @@ const ebirdTaxonomy = require("./public/ebirdTaxOrder.json")
 
 
 // getting the ebird and passwords api key from the env
-//const key = process.env.EBIRDKEY;
+const key = process.env.EBIRDKEY;
 //const password = process.env.MONGO_PASSWORD;
 const password = process.env.abbottspassword;
 const username = process.env.abbottsusername;
@@ -316,7 +316,15 @@ async function getSpecies() {
 
   console.log("true", deps.length == speciesDeps.length)
 
-
+  // get the checklist that the dep is from
+  const checklist = [];
+  for (let i = 0; i < obs.length; i++) {
+    for (let j = 0; j < obs[i].length; j++) {
+      const dep = data[i].responseChecklist.obs[j].subId;
+      checklist.push(dep);
+    }
+  }
+  console.log("checklist", checklist);
 
   // take from "GCKI: 1" to {species: "GCKI", count: 1}
   var obs = obs.flat(1)
@@ -347,12 +355,18 @@ async function getSpecies() {
     common_name: names,
     dependent: deps,
     taxPos: position,
+    checklist: checklist,
   });
-  //df.show();
+  df.show();
   console.log(df.dim());
   df.sortBy('taxPos');
 
-  const speciesList = df.groupBy('dependent', 'species', 'common_name').aggregate(group => group.stat.max('count'))
+  // agg by 'species' and get the checklists as a string for that species
+  const checklistString = df.toArray();
+  // console.log(checklistString)
+
+  const speciesList = df.filter(row => row.get('dependent') !== 'Delete')
+    .groupBy('dependent', 'species', 'common_name').aggregate(group => group.stat.max('count'))
     .rename('aggregation', 'count').groupBy('species', 'common_name').aggregate(group => group.stat.sum('count')).rename('aggregation', 'count');
   speciesList.show();
   const speciesListCollection = speciesList.toCollection();

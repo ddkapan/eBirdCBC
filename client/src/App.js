@@ -8,7 +8,6 @@ import { Dropdown } from 'react-dropdown-now';
 import './dropdown.css';
 import ebirdcode from './ebirdCodes.json';
 import distinctcolors from 'distinct-colors';
-import chroma from "chroma-js";
 //import Marker from 'react-leaflet-enhanced-marker';
 //const track = require('./tracks.json');
 var zip = require('lodash.zip');
@@ -42,6 +41,13 @@ function App() {
     });
     icons.push(icon);
   }
+  icons.push(
+    L.icon({
+      iconUrl: 'https://raw.githubusercontent.com/ddkapan/eBirdCBC/main/icon_maker/icons/red_x.png',
+      iconSize: [40, 40],
+    })
+  )
+  console.log(icons);
 
   // for (let numbers in speciesForViewCount) {
   //   const image = `https://raw.githubusercontent.com/ddkapan/eBirdCBC/main/icon_maker/icons/icon_${numbers}.png`
@@ -238,7 +244,7 @@ function App() {
     console.log("filtered", filtered_data);
     setSpeciesMarkers(filtered_data);
 
-    const dep_arr = []; // array of dependents
+    let dep_arr = ['Delete']; // array of dependents
     for (let i = 0; i < data.length; i++) {
       dep_arr.push(String(i))
     };
@@ -483,7 +489,7 @@ function App() {
     console.log(data);
     setpoints(data);
 
-    const dep_arr = []; // array of dependents
+    let dep_arr = ['Delete']; // array of dependents
     for (let i = 0; i < data.length; i++) {
       dep_arr.push(String(i))
     };
@@ -571,7 +577,9 @@ function App() {
             ))}
           {!speciesMode &&
             markers.map((marker, _index) => (
-              <Marker position={marker[1]} icon={icons[marker[0]]}>
+              <Marker position={marker[1]} icon={
+                marker[0] == 'Delete' ? icons[999] : icons[marker[0]] // if the group is 'Delete', use the 1000 icon in the array
+                }>
                 <Popup minWidth="500" maxHeight="500" autoClose={false}>
                   <h2>Checklist ID: {marker[4]}</h2>
                   <h3>Location: {marker[8]}</h3>
