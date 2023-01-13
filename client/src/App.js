@@ -29,6 +29,7 @@ function App() {
   const [speciesForViewCount, setCount] = useState(0);
   const [dependentList, setDepList] = useState([]);
   //const [speciesForViewCount, setSpeciesCount] = useState(0);
+  const [speciesWithCountsStr, setSpeciesWithCounts] = useState([]);
 
   // making different icons for each dependency
   const icons = []
@@ -47,7 +48,7 @@ function App() {
       iconSize: [40, 40],
     })
   )
-  console.log(icons);
+  // console.log(icons);
 
   // for (let numbers in speciesForViewCount) {
   //   const image = `https://raw.githubusercontent.com/ddkapan/eBirdCBC/main/icon_maker/icons/icon_${numbers}.png`
@@ -278,6 +279,12 @@ function App() {
     const result = {};
     speciesList.forEach((x, i) => result[x] = counts[i]);
     setSpecies(result);
+
+    let speciesWithCounts = [];
+    for (let i = 0; i < species.length; i++) {
+      speciesWithCounts.push(`${speciesList[i]} (${species[i].count})`);
+    }
+    setSpeciesWithCounts(speciesWithCounts);
   }
   //console.log("species", species);
 
@@ -542,7 +549,9 @@ function App() {
       <input type="checkbox" checked={speciesMode} onChange={(_value) => setSpeciesMode(!speciesMode)} />
 
       {speciesMode &&
-        <Dropdown options={Object.keys(species)} onChange={value => speciesView(value.value)} />}
+      // get the species from the database and format them into a string for the popup
+      // remove the counts when sending to the onChange function
+        <Dropdown options={speciesWithCountsStr} onChange={value => speciesView(value.value.split("(")[0].slice(0,-1))} />}
 
       {speciesMode &&
         <p>Total for {speciesForView}: {species[speciesForView]}</p>}
