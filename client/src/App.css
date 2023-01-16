@@ -1,29 +1,29 @@
-:root{
+:root {
   color-scheme: dark;
 }
 
-@import url('https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap');
+@import url("https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap");
 
-
-.leaflet-container .leaflet-marker-pane img, .leaflet-container .leaflet-shadow-pane img, .leaflet-container .leaflet-tile-pane img, .leaflet-container img.leaflet-image-layer, .leaflet-container .leaflet-tile {
+.leaflet-container .leaflet-marker-pane img,
+.leaflet-container .leaflet-shadow-pane img,
+.leaflet-container .leaflet-tile-pane img,
+.leaflet-container img.leaflet-image-layer,
+.leaflet-container .leaflet-tile {
   max-width: none !important;
   max-height: none !important;
   width: 40px;
   height: 25px;
-  padding: 0;
+  padding: 1px;
 }
 
+.hidden {
+  display: none;
+}
 
-
-
-
-
-button:hover{
+button:hover {
   background: #c51f5d;
   color: #243447;
 }
-
-
 
 button {
   background-color: #243447;
@@ -49,8 +49,7 @@ button {
   touch-action: manipulation;
 }
 
-
-input:hover{
+input:hover {
   background: #c51f5d;
   color: #243447;
 }
@@ -88,27 +87,24 @@ input {
   user-select: none;
   -webkit-user-select: none;
   width: auto;
-
 }
-
-
 
 pre {
   white-space: pre-wrap;
   font-family: Ubuntu, "times new roman", times, roman, serif;
 }
 
-.leaflet-container{
+.leaflet-container {
   width: 100vw;
   height: calc(100vh - 325px);
 }
 
-.leaflet-popup-content-wrapper, .leaflet-popup-tip {
-  background: rgb(20,29,38);
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: rgb(20, 29, 38);
   color: white;
   box-shadow: 0 3px 14px rgb(0 0 0 / 40%);
 }
-
 
 .App {
   text-align: center;
@@ -142,14 +138,15 @@ pre {
 
 body {
   font-family: Ubuntu, "times new roman", times, roman, serif;
-  background-color: 	rgb(20,29,38);
-  color: 	rgb(255,255,255);
+  background-color: rgb(20, 29, 38);
+  color: rgb(255, 255, 255);
 }
 
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }

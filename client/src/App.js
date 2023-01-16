@@ -517,7 +517,6 @@ function App() {
     speciesView(speciesForView);
   }
 
-
   return (
     <><div classname="Header">
       <h3>Christmas Bird Count Compiler</h3>
@@ -537,26 +536,33 @@ function App() {
         <input type="submit" />
       </form>
 
-      <button onClick={clear}>Clear</button>
+
+      <button onClick={() => {
+        const confirm = window.confirm("Are you sure you want to clear the database?");
+        if (confirm) {
+          clear();
+        }
+      }}>Clear</button>
+
+    
+
+        {!speciesMode &&
+          <button onClick={getpts}>Get Points</button>}
+        <button onClick={getSpecies}>Get Species</button>
 
 
-      {!speciesMode &&
-        <button onClick={getpts}>Get Points</button>}
-      <button onClick={getSpecies}>Get Species</button>
+        Species Mode
+        <input type="checkbox" checked={speciesMode} onChange={(_value) => setSpeciesMode(!speciesMode)} />
 
+        {speciesMode &&
+          // get the species from the database and format them into a string for the popup
+          // remove the counts when sending to the onChange function
+          <Dropdown options={speciesWithCountsStr} onChange={value => speciesView(value.value.split("(")[0].slice(0, -1))} />}
 
-      Species Mode
-      <input type="checkbox" checked={speciesMode} onChange={(_value) => setSpeciesMode(!speciesMode)} />
+        {speciesMode &&
+          <p>Total for {speciesForView}: {species[speciesForView]}</p>}
 
-      {speciesMode &&
-      // get the species from the database and format them into a string for the popup
-      // remove the counts when sending to the onChange function
-        <Dropdown options={speciesWithCountsStr} onChange={value => speciesView(value.value.split("(")[0].slice(0,-1))} />}
-
-      {speciesMode &&
-        <p>Total for {speciesForView}: {species[speciesForView]}</p>}
-
-    </div><div>
+      </div><div>
         <MapContainer whenCreated={setMap} classname='Map' center={[38, -122]} zoom={10} scrollWheelZoom={true}>
           <TileLayer url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}" />
           {!speciesMode &&
@@ -588,7 +594,7 @@ function App() {
             markers.map((marker, _index) => (
               <Marker position={marker[1]} icon={
                 marker[0] == 'Delete' ? icons[999] : icons[marker[0]] // if the group is 'Delete', use the 1000 icon in the array
-                }>
+              }>
                 <Popup minWidth="500" maxHeight="500" autoClose={false}>
                   <h2>Checklist ID: {marker[4]}</h2>
                   <h3>Location: {marker[8]}</h3>
