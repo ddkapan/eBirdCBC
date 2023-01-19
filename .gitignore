@@ -137,3 +137,4 @@ screenshot*
 password.txt
 app
 api/build/
+*.db
