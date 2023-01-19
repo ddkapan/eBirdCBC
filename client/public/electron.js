@@ -4,16 +4,16 @@ const { app, BrowserWindow } = require("electron");
 const isDev = require("electron-is-dev");
 
 // runnning the api
-var child = require("child_process").execFile;
-var executablePath = path.join(__dirname, "api");
-let api = child(executablePath, function(err, data) {
-    if (err) {
-        console.error(err);
-        return;
-    }
+var { fork } = require("child_process");
+var executablePath = path.join(__dirname, "api/app.js");
+let api = fork(executablePath);
+
+api.on("message", (m) => {
+  console.log("PARENT got message:", m);
 });
-
-
+api.on("error", (err) => {
+  console.log("PARENT got error:", err);
+});
 
 function createWindow() {
   // Create the browser window.
@@ -23,7 +23,7 @@ function createWindow() {
     webPreferences: {
       nodeIntegration: true,
       webSecurity: false,
-    }
+    },
   });
 
   // and load the index.html of the app.
@@ -65,4 +65,3 @@ app.on("activate", () => {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
-
