@@ -563,12 +563,7 @@ function App() {
       {speciesMode &&
         // get the species from the database and format them into a string for the popup
         // remove the counts when sending to the onChange function
-        <Dropdown options={speciesWithCountsStr} onChange={value => speciesView(extractSpeciesName(value.value))} 
-        matcher={
-          (item, val) => {
-            return extractSpeciesName(item.value) === val;
-          }
-        }/>}
+        <Dropdown options={speciesWithCountsStr} onChange={value => speciesView(extractSpeciesName(value.value))}/>}
 
       {speciesMode &&
         <p>Total for {speciesForView}: {species[speciesForView]}</p>}
