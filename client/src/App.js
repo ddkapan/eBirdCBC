@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MapContainer, TileLayer, Popup, Marker, Polyline } from 'react-leaflet';
+import { MapContainer, TileLayer, Popup, Marker, Polyline, Tooltip } from 'react-leaflet';
 import './App.css';
 import L, { marker } from 'leaflet';
 import axios from 'axios';
@@ -593,6 +593,9 @@ function App() {
                   <h3>Species: </h3>
                   <pre>{marker[5]}</pre>
                 </Popup>
+                <Tooltip sticky opacity={1}>
+                  <font size="+2">{marker[0]}</font>
+                </Tooltip>
               </Polyline>
               </>
             ))}
@@ -620,6 +623,9 @@ function App() {
                   <h3>Species: </h3>
                   <pre>{marker[5]}</pre>
                 </Popup>
+                <Tooltip sticky opacity={1}>
+                  <font size="+2">{marker[0]}</font>
+                </Tooltip>
               </Marker>
             ))}
           {speciesMode &&
@@ -644,6 +650,9 @@ function App() {
                   <h3>Species: </h3>
                   <pre>{marker[5]}</pre>
                 </Popup>
+                <Tooltip sticky opacity={1}>
+                <font size="+2">{marker[11]}</font>
+                </Tooltip>
               </Marker>
             ))}
           {speciesMode &&
@@ -667,7 +676,10 @@ function App() {
                     onChange={value => updateSpeciesDep(value.value)} placeholder={marker[0]} />
                   <h3>Species: </h3>
                   <pre>{marker[5]}</pre>
-                </Popup>
+                </Popup>                
+                <Tooltip sticky opacity={1}>
+                  <font size="+2">{marker[11]}</font>
+                </Tooltip>
               </Polyline>
               </>
             ))}
