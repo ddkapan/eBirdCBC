@@ -2,13 +2,13 @@ const puppeteer = require("puppeteer");
 const ebirdcode = require("./public/ebirdCodes.json");
 const axios = require("axios");
 const { response } = require("express");
-const MongoClient = require("mongodb").MongoClient;
 var DataFrame = require("dataframe-js").DataFrame;
 var path = require("path");
 var Datastore = require("@seald-io/nedb");
 const { resolve } = require("path");
 const ebirdTaxonomy = require("./public/ebirdTaxOrder.json");
-const findChrome = require('chrome-finder');
+const fs = require("fs");
+const findChrome = require("chrome-finder");
 const chromePath = findChrome();
 
 // getting the ebird and passwords api key from the env
@@ -17,22 +17,14 @@ const key = process.env.EBIRDKEY;
 const password = process.env.abbottspassword;
 const username = process.env.abbottsusername;
 
-// let chromePath;
-
-// if (process.platform === "darwin") {
-//   chromePath = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome";
-// }
-
-// if (process.platform === "linux") {
-//   chromePath = "/usr/bin/google-chrome";
-// }
-
-// connecting to the mongoDB
-const url = "mongodb://localhost:27017";
+const dir = path.join(process.env.HOME, "Documents/eBirdCBC/");
+if (!fs.existsSync(dir)) {
+  fs.mkdirSync(dir);
+}
 
 // saving the db for faster degugging
 const db = new Datastore({
-  filename: path.join(__dirname, "database.db"),
+  filename: path.join(dir, "database.db"),
   autoload: true,
 });
 
@@ -374,24 +366,27 @@ async function getSpecies() {
 
   // get the list of checklists sorted by species
   let checklistBySpecies = [];
-  for(let i = 0; i < checklistString.length; i++) {
+  for (let i = 0; i < checklistString.length; i++) {
     checklistBySpecies.push(checklistString[i][5]);
   }
   console.log(checklistBySpecies);
 
   // get the number of times each species was seen
-  const checklistCount = df.groupBy('species').aggregate(group => group.count()).toArray();
+  const checklistCount = df
+    .groupBy("species")
+    .aggregate((group) => group.count())
+    .toArray();
   const speciesCounts = [];
-  for(let i = 0; i < checklistCount.length; i++) {
+  for (let i = 0; i < checklistCount.length; i++) {
     speciesCounts.push(checklistCount[i][1]);
   }
   console.log(speciesCounts);
 
   // get the list of checklists for each species
   const checklistList = [];
-  for(let i = 0; i < speciesCounts.length; i++) {
+  for (let i = 0; i < speciesCounts.length; i++) {
     let speciesChecks = [];
-    for(let j = 0; j < speciesCounts[i]; j++) {
+    for (let j = 0; j < speciesCounts[i]; j++) {
       speciesChecks.push(checklistBySpecies[0]);
     }
   } // NOT WORKING YET
