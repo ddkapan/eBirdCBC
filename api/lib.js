@@ -345,7 +345,7 @@ async function getSpecies() {
   for (let i = 0; i < species.length; i++) {
     position.push(ebirdTaxonomy[species[i]]);
   }
-  console.log("posiotion", position);
+  console.log("position", position);
 
   console.log(obs.length);
   //console.log(data);
@@ -363,7 +363,31 @@ async function getSpecies() {
 
   // agg by 'species' and get the checklists as a string for that species
   const checklistString = df.toArray();
-  // console.log(checklistString)
+  console.log(checklistString);
+
+  // get the list of checklists sorted by species
+  let checklistBySpecies = [];
+  for(let i = 0; i < checklistString.length; i++) {
+    checklistBySpecies.push(checklistString[i][5]);
+  }
+  console.log(checklistBySpecies);
+
+  // get the number of times each species was seen
+  const checklistCount = df.groupBy('species').aggregate(group => group.count()).toArray();
+  const speciesCounts = [];
+  for(let i = 0; i < checklistCount.length; i++) {
+    speciesCounts.push(checklistCount[i][1]);
+  }
+  console.log(speciesCounts);
+
+  // get the list of checklists for each species
+  const checklistList = [];
+  for(let i = 0; i < speciesCounts.length; i++) {
+    let speciesChecks = [];
+    for(let j = 0; j < speciesCounts[i]; j++) {
+      speciesChecks.push(checklistBySpecies[0]);
+    }
+  } // NOT WORKING YET
 
   const speciesList = df.filter(row => row.get('dependent') !== 'Delete')
     .groupBy('dependent', 'species', 'common_name').aggregate(group => group.stat.max('count'))

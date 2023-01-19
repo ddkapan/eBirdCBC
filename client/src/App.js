@@ -517,6 +517,12 @@ function App() {
     speciesView(speciesForView);
   }
 
+  const extractSpeciesName = (species) => {
+    const value = species.slice(0, species.lastIndexOf("(") - 1);
+    return value;
+  }
+
+
   return (
     <><div classname="Header">
       <h3>Christmas Bird Count Compiler</h3>
@@ -544,25 +550,30 @@ function App() {
         }
       }}>Clear</button>
 
-    
-
-        {!speciesMode &&
-          <button onClick={getpts}>Get Points</button>}
-        <button onClick={getSpecies}>Get Species</button>
 
 
-        Species Mode
-        <input type="checkbox" checked={speciesMode} onChange={(_value) => setSpeciesMode(!speciesMode)} />
+      {!speciesMode &&
+        <button onClick={getpts}>Get Points</button>}
+      <button onClick={getSpecies}>Get Species</button>
 
-        {speciesMode &&
-          // get the species from the database and format them into a string for the popup
-          // remove the counts when sending to the onChange function
-          <Dropdown options={speciesWithCountsStr} onChange={value => speciesView(value.value.split("(")[0].slice(0, -1))} />}
 
-        {speciesMode &&
-          <p>Total for {speciesForView}: {species[speciesForView]}</p>}
+      Species Mode
+      <input type="checkbox" checked={speciesMode} onChange={(_value) => setSpeciesMode(!speciesMode)} />
 
-      </div><div>
+      {speciesMode &&
+        // get the species from the database and format them into a string for the popup
+        // remove the counts when sending to the onChange function
+        <Dropdown options={speciesWithCountsStr} onChange={value => speciesView(extractSpeciesName(value.value))} 
+        matcher={
+          (item, val) => {
+            return extractSpeciesName(item.value) === val;
+          }
+        }/>}
+
+      {speciesMode &&
+        <p>Total for {speciesForView}: {species[speciesForView]}</p>}
+
+    </div><div>
         <MapContainer whenCreated={setMap} classname='Map' center={[38, -122]} zoom={10} scrollWheelZoom={true}>
           <TileLayer url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}" />
           {!speciesMode &&
