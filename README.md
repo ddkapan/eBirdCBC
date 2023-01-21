@@ -4,7 +4,7 @@ Using eBird best practices to generate a best practices CBC count for a given co
 # Installation Instructions
 
 ## App
-Download the appropriate version of the app for your operating system on the [releases page](https://github.com/ddkapan/eBirdCBC/releases/) of this github. Then run it. Windows is not supported because, umm, windows bad. But you can try to compile it for windows if you want.
+Download the appropriate version of the app for your operating system on the [releases page](https://github.com/ddkapan/eBirdCBC/releases/) of this github. Then run it. 
 
 You need a version of chrome installed (chrome or chromium). 
 
