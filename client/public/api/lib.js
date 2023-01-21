@@ -17,7 +17,13 @@ const key = process.env.EBIRDKEY;
 const password = process.env.abbottspassword;
 const username = process.env.abbottsusername;
 
-const dir = path.join(process.env.HOME, "Documents/eBirdCBC/");
+let dir;
+
+if (process.platform === 'win32') {
+  dir = path.join(process.env.HOMEPATH, "Documents/eBirdCBC/");
+} else {
+  dir = path.join(process.env.HOME, "Documents/eBirdCBC/");
+}
 if (!fs.existsSync(dir)) {
   fs.mkdirSync(dir);
 }
