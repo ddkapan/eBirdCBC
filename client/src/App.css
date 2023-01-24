@@ -32,6 +32,10 @@
   border-right-color: #243447;
 }
 
+.leaflet-tooltip-left:before {
+  border-left-color: #243447;
+}
+
 path.leaflet-interactive:focus{
   outline: none;
 }
