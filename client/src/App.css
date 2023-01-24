@@ -3,6 +3,7 @@
 }
 
 @import url("https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap");
+@import url("https://fonts.googleapis.com/css?family=Ubuntu:300,400,500,700&display=swap");
 
 .leaflet-container .leaflet-marker-pane img,
 .leaflet-container .leaflet-shadow-pane img,
@@ -14,6 +15,25 @@
   width: 40px;
   height: 25px;
   padding: 1px;
+}
+
+.leaflet-tooltip {
+  background: #243447;
+  color: white;
+  padding-top: 1px;
+  padding-bottom: 1px;
+  padding-left: 2px;
+  padding-right: 2px;
+  border-radius: 4px;
+  border: none;
+}
+
+.leaflet-tooltip-right:before {
+  border-right-color: #243447;
+}
+
+path.leaflet-interactive:focus{
+  outline: none;
 }
 
 .hidden {

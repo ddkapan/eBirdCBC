@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useLayoutEffect } from 'react';
 import { MapContainer, TileLayer, Popup, Marker, Polyline, Tooltip } from 'react-leaflet';
 import './App.css';
 import L, { marker } from 'leaflet';
@@ -8,6 +8,8 @@ import { Dropdown } from 'react-dropdown-now';
 import './dropdown.css';
 import ebirdcode from './ebirdCodes.json';
 import distinctcolors from 'distinct-colors';
+import Collapsible from 'react-collapsible';
+import './collapsible.css';
 var zip = require('lodash.zip');
 
 
@@ -503,54 +505,66 @@ function App() {
     return value;
   }
 
+  const header = useRef(null);
+  const windowHeight = window.innerHeight;
+  const [headerHeight, setHeaderHeight] = useState(0);
+
+  useLayoutEffect(() => {
+    setHeaderHeight(header.current.offsetHeight);
+  });
+
+  const offsetHeight = windowHeight - headerHeight;
+  console.log(offsetHeight);
 
   return (
-    <><div classname="Header">
-      <h3>Christmas Bird Count Compiler</h3>
-      1.) Input the checklist IDs or trip report number in the text box. Then submit. <br></br>
-      3.) Sign into your account when the window open. Do not touch the chrome window while it collects the tracks. <br></br>
-      3.) Navigate to the points and click on them to see the species and notes. Select the 'group' status for each point to group overlapping points together.<br></br>
-      4.) Species Mode allows you to go species by species when grouping checklists. <br></br>
-      5.) Click "Get Species" to get the species from the database and compile them into a CSV file that will download.<br></br>
-      <form onSubmit={handleSubmit}>
-        <label>
-          <input
-            type="text"
-            value={checklists}
-            placeholder="Checklists IDs (comma delimited) or Trip Report"
-            onChange={(e) => setlist(e.target.value)} />
-        </label>
-        <input type="submit" />
-      </form>
+    <><div classname="Header" ref={header}>
+      <Collapsible trigger="Christmas Bird Count Compiler" open>
+        1.) Input the checklist IDs or trip report number in the text box. Then submit. <br></br>
+        3.) Sign into your account when the window open. Do not touch the chrome window while it collects the tracks. <br></br>
+        3.) Navigate to the points and click on them to see the species and notes. Select the 'group' status for each point to group overlapping points together.<br></br>
+        4.) Species Mode allows you to go species by species when grouping checklists. <br></br>
+        5.) Click "Get Species" to get the species from the database and compile them into a CSV file that will download.<br></br>
+        <form onSubmit={handleSubmit}>
+          <label>
+            <input
+              type="text"
+              value={checklists}
+              placeholder="Checklists IDs (comma delimited) or Trip Report"
+              onChange={(e) => setlist(e.target.value)} />
+          </label>
+          <input type="submit" />
+        </form>
+      </Collapsible>
 
 
-      <button onClick={() => {
-        const confirm = window.confirm("Are you sure you want to clear the database?");
-        if (confirm) {
-          clear();
-        }
-      }}>Clear</button>
+        <button onClick={() => {
+          const confirm = window.confirm("Are you sure you want to clear the database?");
+          if (confirm) {
+            clear();
+          }
+        }}>Clear</button>
 
 
 
-      {!speciesMode &&
-        <button onClick={getpts}>Get Points</button>}
-      <button onClick={getSpecies}>Get Species</button>
+        {!speciesMode &&
+          <button onClick={getpts}>Get Points</button>}
+        <button onClick={getSpecies}>Get Species</button>
 
 
-      Species Mode
-      <input type="checkbox" checked={speciesMode} onChange={(_value) => setSpeciesMode(!speciesMode)} />
+        Species Mode
+        <input type="checkbox" checked={speciesMode} onChange={(_value) => setSpeciesMode(!speciesMode)} />
 
-      {speciesMode &&
-        // get the species from the database and format them into a string for the popup
-        // remove the counts when sending to the onChange function
-        <Dropdown options={speciesWithCountsStr} onChange={value => speciesView(extractSpeciesName(value.value))}/>}
+        {speciesMode &&
+          // get the species from the database and format them into a string for the popup
+          // remove the counts when sending to the onChange function
+          <Dropdown options={speciesWithCountsStr} onChange={value => speciesView(extractSpeciesName(value.value))} />}
 
-      {speciesMode &&
-        <p>Total for {speciesForView}: {species[speciesForView]}</p>}
+        {speciesMode &&
+          <p>Total for {speciesForView}: {species[speciesForView]}</p>}
 
-    </div><div>
-        <MapContainer whenCreated={setMap} classname='Map' center={[38, -122]} zoom={10} scrollWheelZoom={true}>
+</div><div>
+        <MapContainer whenCreated={setMap} classname='Map' center={[38, -122]} zoom={10}
+          scrollWheelZoom={true} style={{ height: offsetHeight}}>
           <TileLayer url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}" />
           {!speciesMode &&
             markers.map((marker, _index) => (
@@ -620,7 +634,7 @@ function App() {
                   <pre>{marker[5]}</pre>
                 </Popup>
                 <Tooltip sticky opacity={1}>
-                <font size="+2">{marker[11]}</font>
+                  <font size="+2">{marker[11]}</font>
                 </Tooltip>
               </Marker>
             ))}
@@ -641,7 +655,7 @@ function App() {
                     onChange={value => updateSpeciesDep(value.value)} placeholder={marker[0]} />
                   <h3>Species: </h3>
                   <pre>{marker[5]}</pre>
-                </Popup>                
+                </Popup>
                 <Tooltip sticky opacity={1}>
                   <font size="+2">{marker[11]}</font>
                 </Tooltip>
