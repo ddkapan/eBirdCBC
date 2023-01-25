@@ -517,7 +517,9 @@ function App() {
   console.log(offsetHeight);
 
   return (
-    <><div classname="Header" ref={header}>
+    <>
+    <div className="flex-container">
+    <div id="Header" ref={header}>
       <Collapsible trigger="Christmas Bird Count Compiler" open>
         1.) Input the checklist IDs or trip report number in the text box. Then submit. <br></br>
         3.) Sign into your account when the window open. Do not touch the chrome window while it collects the tracks. <br></br>
@@ -562,9 +564,9 @@ function App() {
         {speciesMode &&
           <p>Total for {speciesForView}: {species[speciesForView]}</p>}
 
-</div><div>
+</div><div id="map-container">
         <MapContainer whenCreated={setMap} classname='Map' center={[38, -122]} zoom={10}
-          scrollWheelZoom={true} style={{ height: offsetHeight}}>
+          scrollWheelZoom={true}>
           <TileLayer url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}" />
           {!speciesMode &&
             markers.map((marker, _index) => (
@@ -663,6 +665,7 @@ function App() {
               </>
             ))}
         </MapContainer>
+      </div>
       </div></>
   );
 };
