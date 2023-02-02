@@ -138,3 +138,4 @@ password.txt
 app
 api/build/
 *.db
+.firebase/
