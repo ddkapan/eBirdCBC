@@ -21,6 +21,7 @@
     "dataframe-js": "^1.4.4",
     "distinct-colors": "^3.0.0",
     "dmg-builder": "^24.0.0-alpha.9",
+    "dmg-license": "^1.0.11",
     "dotenv": "^16.0.3",
     "electron-is-dev": "^2.0.0",
     "express": "^4.18.2",
@@ -98,7 +99,6 @@
     "electron": "^22.0.0",
     "electron-builder": "^23.6.0",
     "electron-forge": "^5.2.4",
-    "electron-prebuilt-compile": "8.2.0",
     "export-to-csv": "^0.2.1",
     "leaflet": "^1.9.3",
     "wait-on": "^7.0.1"
