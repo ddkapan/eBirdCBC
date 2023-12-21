@@ -398,17 +398,31 @@ async function getSpecies() {
   } // NOT WORKING YET
 
   const speciesList = df
-    .filter((row) => row.get("dependent") !== "Delete")
-    .groupBy("dependent", "species", "common_name")
-    .aggregate((group) => group.stat.max("count"))
-    .rename("aggregation", "count")
-    .groupBy("species", "common_name")
-    .aggregate((group) => group.stat.sum("count"))
-    .rename("aggregation", "count");
-  speciesList.show();
-  const speciesListCollection = speciesList.toCollection();
-  console.log(speciesListCollection);
-  return speciesListCollection;
+  .filter((row) => row.get("dependent") !== "Delete")
+  .groupBy("dependent", "species", "common_name")
+  .aggregate((group) => {
+      const sum = group.stat.max("count");
+      const checklists = group.select("checklist").toArray();
+      return [ sum, checklists ];
+  })
+  .rename("aggregation", "count_checklists")
+  .withColumn("count", (row) => row.get("count_checklists")[0])
+  .withColumn("checklists", (row) => "(" + String(row.get("count_checklists")[1]) + ")")
+  .groupBy("species", "common_name")
+  .aggregate((group) => {
+      const sum = group.stat.sum("count");
+      const checklists = [].concat(...group.select("checklists").toArray());
+      console.log(checklists);
+      return [ sum, checklists ];
+  })
+  .rename("aggregation", "count_checklists")
+  .withColumn("count", (row) => row.get("count_checklists")[0])
+  .withColumn("checklists", (row) => String(row.get("count_checklists")[1]))
+  .select("species", "common_name", "count", "checklists")
+speciesList.show();
+const speciesListCollection = speciesList.toCollection();
+console.log(speciesListCollection);
+return speciesListCollection;
 }
 
 //getTrack('S124180823')
