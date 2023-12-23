@@ -10,6 +10,7 @@ import ebirdcode from './ebirdCodes.json';
 import distinctcolors from 'distinct-colors';
 import Collapsible from 'react-collapsible';
 import './collapsible.css';
+import { Group } from './Group';
 var zip = require('lodash.zip');
 
 
@@ -630,8 +631,7 @@ function App() {
                   <h3>Group: {marker[0]}
                     <br></br>
                   </h3>
-                  <Dropdown options={(deps.map((i) => JSON.parse(`{"value": "${marker[4]},${i},${speciesForView}", "label": "${i}"}`)))}
-                    onChange={value => updateSpeciesDep(value.value)} placeholder={marker[0]} />
+                  <Group checklist={marker[4]} species={speciesForView} onClick={updateSpeciesDep} />
                   <h3>Species: </h3>
                   <pre>{marker[5]}</pre>
                 </Popup>
@@ -653,8 +653,7 @@ function App() {
                   <h3>Group: {marker[0]}
                     <br></br>
                   </h3>
-                  <Dropdown options={(deps.map((i) => JSON.parse(`{"value": "${marker[4]},${i},${speciesForView}", "label": "${i}"}`)))}
-                    onChange={value => updateSpeciesDep(value.value)} placeholder={marker[0]} />
+                  <Group checklist={marker[4]} species={speciesForView} onClick={updateSpeciesDep} />
                   <h3>Species: </h3>
                   <pre>{marker[5]}</pre>
                 </Popup>
