@@ -539,6 +539,37 @@ function App() {
     }
   }
 
+  function downloadFile() {
+    axios({
+      url: 'http://localhost:9000/downloadDB',
+      method: 'GET',
+      responseType: 'blob', // Important
+    }).then((response) => {
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'database.db'); // or any other extension
+      document.body.appendChild(link);
+      link.click();
+    });
+  }
+
+  function uploadFile(e) {
+    const formData = new FormData();
+    console.log(e.target.files[0]);
+    formData.append('file', e.target.files[0]);
+    axios.post('http://localhost:9000/uploadDB', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    }).then(function (response) {
+      console.log(response);
+    })
+      .catch(function (error) {
+        console.log(error);
+      });
+  }
+
   return (
     <>
       <div className="flex-container">
@@ -559,6 +590,10 @@ function App() {
               </label>
               <input type="submit" />
             </form>
+            <label className={"filelabel"} htmlFor="fileupload">Upload Database</label>
+            <input type='file' id='fileupload' accept='.db' onChange={uploadFile} style={{ display: "none" }} />
+            <button onClick={downloadFile}>Download Database</button>
+
           </Collapsible>
 
 
@@ -583,7 +618,7 @@ function App() {
             // get the species from the database and format them into a string for the popup
             // remove the counts when sending to the onChange function
             <>
-              <Dropdown options={speciesWithCountsStr} onChange={value => speciesView(extractSpeciesName(value.value))}/>
+              <Dropdown options={speciesWithCountsStr} onChange={value => speciesView(extractSpeciesName(value.value))} />
               <button onClick={previousSpecies}>
                 Previous Species
               </button>

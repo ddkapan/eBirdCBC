@@ -29,6 +29,7 @@
     "json-2-csv": "^3.18.0",
     "kill-port": "^2.0.1",
     "lodash.zip": "^4.2.0",
+    "multer": "^1.4.5-lts.1",
     "nedb": "^1.8.0",
     "nedb-promises": "^6.2.1",
     "puppeteer": "^19.5.2",

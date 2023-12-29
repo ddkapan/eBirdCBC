@@ -29,7 +29,7 @@ if (!fs.existsSync(dir)) {
 }
 
 // saving the db for faster degugging
-const db = new Datastore({
+var db = new Datastore({
   filename: path.join(dir, "database.db"),
   autoload: true,
 });
@@ -398,31 +398,47 @@ async function getSpecies() {
   } // NOT WORKING YET
 
   const speciesList = df
-  .filter((row) => row.get("dependent") !== "Delete")
-  .groupBy("dependent", "species", "common_name")
-  .aggregate((group) => {
+    .filter((row) => row.get("dependent") !== "Delete")
+    .groupBy("dependent", "species", "common_name")
+    .aggregate((group) => {
       const sum = group.stat.max("count");
       const checklists = group.select("checklist").toArray();
-      return [ sum, checklists ];
-  })
-  .rename("aggregation", "count_checklists")
-  .withColumn("count", (row) => row.get("count_checklists")[0])
-  .withColumn("checklists", (row) => "(" + String(row.get("count_checklists")[1]) + ")")
-  .groupBy("species", "common_name")
-  .aggregate((group) => {
+      return [sum, checklists];
+    })
+    .rename("aggregation", "count_checklists")
+    .withColumn("count", (row) => row.get("count_checklists")[0])
+    .withColumn("checklists", (row) => "(" + String(row.get("count_checklists")[1]) + ")")
+    .groupBy("species", "common_name")
+    .aggregate((group) => {
       const sum = group.stat.sum("count");
       const checklists = [].concat(...group.select("checklists").toArray());
       console.log(checklists);
-      return [ sum, checklists ];
-  })
-  .rename("aggregation", "count_checklists")
-  .withColumn("count", (row) => row.get("count_checklists")[0])
-  .withColumn("checklists", (row) => String(row.get("count_checklists")[1]))
-  .select("species", "common_name", "count", "checklists")
-speciesList.show();
-const speciesListCollection = speciesList.toCollection();
-console.log(speciesListCollection);
-return speciesListCollection;
+      return [sum, checklists];
+    })
+    .rename("aggregation", "count_checklists")
+    .withColumn("count", (row) => row.get("count_checklists")[0])
+    .withColumn("checklists", (row) => String(row.get("count_checklists")[1]))
+    .select("species", "common_name", "count", "checklists")
+  speciesList.show();
+  const speciesListCollection = speciesList.toCollection();
+  console.log(speciesListCollection);
+  return speciesListCollection;
+}
+
+async function uploadDB(data) {
+  console.log(data);
+  db = new Datastore({
+    filename: path.join(dir, "database.db"),
+    autoload: true,
+  }
+  )
+};
+
+async function downloadDB() {
+  const data = fs.readFileSync(path.join(dir, "database.db"), "utf8");
+  console.log(data);
+  console.log("downloaded the database");
+  return data;
 }
 
 //getTrack('S124180823')
@@ -435,4 +451,6 @@ module.exports = {
   getSpecies,
   tripReport,
   updateSpeciesDep,
+  uploadDB,
+  downloadDB,
 };
