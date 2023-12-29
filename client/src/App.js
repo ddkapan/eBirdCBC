@@ -564,6 +564,7 @@ function App() {
       }
     }).then(function (response) {
       console.log(response);
+      getpts();
     })
       .catch(function (error) {
         console.log(error);
