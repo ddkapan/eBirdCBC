@@ -22,6 +22,9 @@ export function Group(props) {
             <button className="group-button" onClick={() => props.onClick(`${props.checklist},6,${props.species}`)}>
                 6
             </button>
+            <button className="group-button" onClick={() => props.onClick(`${props.checklist},Delete,${props.species}`)}>
+                Delete
+            </button>
         </div>
     );
 }
