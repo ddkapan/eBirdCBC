@@ -1,3 +1,10 @@
+#VSCODE
+.vscode
+
+
+#mac
+.DS_Store
+
 # Logs
 logs
 *.log
